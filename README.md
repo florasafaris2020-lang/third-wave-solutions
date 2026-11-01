@@ -3,8 +3,10 @@
 Static marketing site for Third Wave Solutions: businesses for sale, buyer-side vetting,
 seller submissions and buyer enquiry forms.
 
-- **Live site:** https://site-76d41565aa394259ba10ec24509915af.freebuff.page
-- **Preview site:** https://site-b3d22174aeb84bc0ac9bd8f2ebaf4749.freebuff.page
+- **GitHub repository:** https://github.com/florasafaris2020-lang/third-wave-solutions
+- **GitHub Pages site:** https://florasafaris2020-lang.github.io/third-wave-solutions/
+- **Freebuff hosted site:** https://site-76d41565aa394259ba10ec24509915af.freebuff.page
+- **Freebuff preview:** https://site-b3d22174aeb84bc0ac9bd8f2ebaf4749.freebuff.page
 
 ## Pages
 
@@ -46,7 +48,19 @@ not enough, respondents need access) and copy the resulting `/d/e/...` link. Rep
 `public/listings.html` seller link, if used) with it. Until then, the short "Or send us the
 basics" form on the seller page captures submissions by email.
 
-## Editing and redeploying
+## Editing and redeploying on GitHub
+
+Every push to `main` publishes `public/` through `.github/workflows/pages.yml` using GitHub
+Pages (Settings → Pages → Source: GitHub Actions). Website files live only in `public/`;
+the workflow uploads that folder, so the Worker files are ignored by Pages.
+
+```bash
+git add -A && git commit -m "Update site copy" && git push origin HEAD:main
+```
+
+The Pages build takes about a minute; progress is under the repo's **Actions** tab.
+
+## Editing and redeploying on Freebuff Sites
 
 All content is plain HTML/CSS/JS in `public/`. Images are in `public/assets/img/`.
 `deploy.json` describes the deployment: `worker.js` serves the static assets from
