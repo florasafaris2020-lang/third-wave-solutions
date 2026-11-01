@@ -5,8 +5,7 @@ seller submissions and buyer enquiry forms.
 
 - **GitHub repository:** https://github.com/florasafaris2020-lang/third-wave-solutions
 - **GitHub Pages site:** https://florasafaris2020-lang.github.io/third-wave-solutions/
-- **Freebuff hosted site:** https://site-76d41565aa394259ba10ec24509915af.freebuff.page
-- **Freebuff preview:** https://site-b3d22174aeb84bc0ac9bd8f2ebaf4749.freebuff.page
+- **Freebuff site:** unpublished on 1 Nov 2026 — the deployment and URLs are retained but serve nothing. GitHub Pages above is the live site.
 
 ## Pages
 
