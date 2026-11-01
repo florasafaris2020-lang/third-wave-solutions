@@ -1,0 +1,11 @@
+# Build and tooling caches
+.wrangler/
+node_modules/
+.DS_Store
+
+# Environment files and secrets
+.env
+.env.*
+.dev.vars
+*.pem
+*.key
