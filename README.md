@@ -24,11 +24,12 @@ Contact details used throughout: **0101 490 036** · **s.lakhani1@aim.com** · S
 
 ## Before the forms deliver mail — required
 
-Form submissions post to **FormSubmit** (`https://formsubmit.co/el/tugozu`), which forwards
-them to the address linked to that endpoint. That link hides the email address from the
-page source, so the forms no longer contain `s.lakhani1@aim.com`.
+Form submissions post to **FormSubmit** (`https://formsubmit.co/s.lakhani1@aim.com`), which
+forwards them to that address. The address is spelled out in the form `action`
+attributes on purpose: an earlier obfuscated `/el/` endpoint delivered nowhere that could
+be verified, and the plain endpoint makes the destination unambiguous.
 
-A `/el/` endpoint only accepts ordinary form posts (the `/ajax/` variant returns 404) and
+FormSubmit only accepts ordinary form posts (the `/ajax/` variant is unreliable) and
 always redirects to a fixed address afterwards, ignoring `_next`. So `site.js` posts each
 form into a hidden iframe: the visitor stays on the page and the inline "message sent"
 note appears in place. Without JavaScript the browser navigates and ends up on the site
@@ -39,8 +40,8 @@ home page instead.
 3. Send a second test enquiry and confirm it arrives in the inbox (check spam).
 
 Until that activation is done, submissions will not be delivered. If you change the
-destination email, replace the endpoint in the form `action` attributes (seven forms) and
-leave the contact blocks on each page as they are.
+destination email, replace it in the form `action` attributes (seven forms) and leave the
+contact blocks on each page as they are.
 
 ## Sellers' Google Form — required
 

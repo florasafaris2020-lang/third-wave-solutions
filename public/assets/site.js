@@ -22,10 +22,10 @@
   var year = document.getElementById("year");
   if (year) year.textContent = new Date().getFullYear();
 
-  // Forms post to the FormSubmit endpoint (https://formsubmit.co/el/tugozu).
-  // That endpoint always redirects to a fixed URL afterwards, so the form is
+  // Forms post to FormSubmit (https://formsubmit.co/s.lakhani1@aim.com).
+  // FormSubmit always redirects to a fixed URL afterwards, so the form is
   // posted into a hidden iframe and the visitor stays on the page.
-  var forms = document.querySelectorAll('form[action*="formsubmit.co/el/"]');
+  var forms = document.querySelectorAll('form[action*="formsubmit.co/"]');
   if (!forms.length) return;
 
   var frameName = "tw-form-target";
