@@ -24,16 +24,22 @@ Contact details used throughout: **0101 490 036** · **s.lakhani1@aim.com** · S
 
 ## Before the forms deliver mail — required
 
-Form submissions post to **FormSubmit** (`https://formsubmit.co/ajax/s.lakhani1@aim.com`),
-which forwards them to the email address in the site JavaScript and form actions.
+Form submissions post to **FormSubmit** (`https://formsubmit.co/el/tugozu`), which forwards
+them to the address linked to that endpoint. That link hides the email address from the
+page source, so the forms no longer contain `s.lakhani1@aim.com`.
+
+Because a `/el/` endpoint only accepts ordinary form posts (the `/ajax/` variant returns
+404), the forms are not intercepted by JavaScript. FormSubmit handles the submission and
+redirects to `thanks.html`, which `site.js` passes as an absolute `_next` URL so it works
+under the GitHub Pages subpath.
 
 1. Open the live site and send one test enquiry.
 2. FormSubmit emails `s.lakhani1@aim.com` an **activation link**. Click it once.
 3. Send a second test enquiry and confirm it arrives in the inbox (check spam).
 
-Until that activation is done, submissions will not be delivered and the page will show
-the "please call / email" fallback message. If you change the contact email, update it in
-`public/assets/site.js`, the form `action` attributes, and the contact blocks on each page.
+Until that activation is done, submissions will not be delivered. If you change the
+destination email, replace the endpoint in the form `action` attributes (seven forms) and
+leave the contact blocks on each page as they are.
 
 ## Sellers' Google Form — required
 

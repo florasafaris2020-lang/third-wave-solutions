@@ -22,72 +22,24 @@
   var year = document.getElementById("year");
   if (year) year.textContent = new Date().getFullYear();
 
-  // Forms: submit via FormSubmit AJAX so the visitor stays on the page.
-  function wireForm(form, config) {
-    var status = form.querySelector("[id$='formStatus']") || document.getElementById("formStatus");
-    var button = form.querySelector("button[type='submit']");
-    var original = button ? button.innerHTML : "";
-    var endpoint = "https://formsubmit.co/ajax/" + config.email;
+  // Forms post straight to the FormSubmit endpoint (https://formsubmit.co/el/tugozu);
+  // formsubmit.co ignores _next unless it is an absolute URL, so build it here.
+  var forms = document.querySelectorAll('form[action*="formsubmit.co/el/"]');
+  Array.prototype.forEach.call(forms, function (form) {
+    var next = document.createElement("input");
+    next.type = "hidden";
+    next.name = "_next";
+    next.value = new URL("thanks.html", window.location.href).href;
+    form.appendChild(next);
 
-    function say(message, kind) {
-      if (!status) return;
-      status.textContent = message;
-      status.style.color = kind === "error" ? "#b4423a" : "#0a5f59";
-      status.style.fontWeight = "600";
-    }
-
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      if (!form.reportValidity()) return;
-
-      var data = new FormData(form);
-      if (data.get("_honey")) return; // silent bot trap
-
-      if (button) {
+    // Guard against double submits while the browser is navigating away.
+    form.addEventListener("submit", function () {
+      var button = form.querySelector("button[type='submit']");
+      if (!button) return;
+      window.setTimeout(function () {
         button.disabled = true;
         button.innerHTML = "Sending…";
-      }
-      say("", "ok");
-
-      fetch(endpoint, {
-        method: "POST",
-        body: data,
-        headers: { Accept: "application/json" }
-      })
-        .then(function (res) {
-          return res.json().then(function (body) {
-            return { ok: res.ok, body: body };
-          });
-        })
-        .then(function (result) {
-          var success = result.ok && result.body && String(result.body.success) === "true";
-          if (success) {
-            form.reset();
-            say("Thank you — your enquiry has been sent. We usually reply within one working day. For anything urgent call 0101 490 036.", "ok");
-          } else {
-            say("We could not send the form automatically. Please call or WhatsApp 0101 490 036, or email s.lakhani1@aim.com.", "error");
-          }
-        })
-        .catch(function () {
-          say("Network error — the form was not sent. Please call or WhatsApp 0101 490 036, or email s.lakhani1@aim.com.", "error");
-        })
-        .finally(function () {
-          if (button) {
-            button.disabled = false;
-            button.innerHTML = original;
-          }
-        });
+      }, 0);
     });
-  }
-
-  var forms = [
-    { id: "enquiryForm", email: "s.lakhani1@aim.com" },
-    { id: "quoteForm", email: "s.lakhani1@aim.com" },
-    { id: "listingEnquiryForm", email: "s.lakhani1@aim.com" },
-    { id: "sellerForm", email: "s.lakhani1@aim.com" }
-  ];
-  forms.forEach(function (cfg) {
-    var el = document.getElementById(cfg.id);
-    if (el) wireForm(el, cfg);
   });
 })();
