@@ -28,10 +28,11 @@ Form submissions post to **FormSubmit** (`https://formsubmit.co/el/tugozu`), whi
 them to the address linked to that endpoint. That link hides the email address from the
 page source, so the forms no longer contain `s.lakhani1@aim.com`.
 
-Because a `/el/` endpoint only accepts ordinary form posts (the `/ajax/` variant returns
-404), the forms are not intercepted by JavaScript. FormSubmit handles the submission and
-redirects to `thanks.html`, which `site.js` passes as an absolute `_next` URL so it works
-under the GitHub Pages subpath.
+A `/el/` endpoint only accepts ordinary form posts (the `/ajax/` variant returns 404) and
+always redirects to a fixed address afterwards, ignoring `_next`. So `site.js` posts each
+form into a hidden iframe: the visitor stays on the page and the inline "message sent"
+note appears in place. Without JavaScript the browser navigates and ends up on the site
+home page instead.
 
 1. Open the live site and send one test enquiry.
 2. FormSubmit emails `s.lakhani1@aim.com` an **activation link**. Click it once.

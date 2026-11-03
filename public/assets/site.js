@@ -22,24 +22,56 @@
   var year = document.getElementById("year");
   if (year) year.textContent = new Date().getFullYear();
 
-  // Forms post straight to the FormSubmit endpoint (https://formsubmit.co/el/tugozu);
-  // formsubmit.co ignores _next unless it is an absolute URL, so build it here.
+  // Forms post to the FormSubmit endpoint (https://formsubmit.co/el/tugozu).
+  // That endpoint always redirects to a fixed URL afterwards, so the form is
+  // posted into a hidden iframe and the visitor stays on the page.
   var forms = document.querySelectorAll('form[action*="formsubmit.co/el/"]');
-  Array.prototype.forEach.call(forms, function (form) {
-    var next = document.createElement("input");
-    next.type = "hidden";
-    next.name = "_next";
-    next.value = new URL("thanks.html", window.location.href).href;
-    form.appendChild(next);
+  if (!forms.length) return;
 
-    // Guard against double submits while the browser is navigating away.
+  var frameName = "tw-form-target";
+  var frame = document.createElement("iframe");
+  frame.name = frameName;
+  frame.title = "Form submission";
+  frame.setAttribute("aria-hidden", "true");
+  frame.style.display = "none";
+  document.body.appendChild(frame);
+
+  Array.prototype.forEach.call(forms, function (form) {
+    var status = form.querySelector("[id$='formStatus']") || document.getElementById("formStatus");
+    var button = form.querySelector("button[type='submit']");
+    var original = button ? button.innerHTML : "";
+    var timer = null;
+
+    form.target = frameName;
+
+    function say(message, color) {
+      if (!status) return;
+      status.textContent = message;
+      status.style.color = color;
+      status.style.fontWeight = "600";
+    }
+
     form.addEventListener("submit", function () {
-      var button = form.querySelector("button[type='submit']");
-      if (!button) return;
-      window.setTimeout(function () {
+      // The browser has already validated required fields at this point.
+      if (button) {
         button.disabled = true;
         button.innerHTML = "Sending…";
-      }, 0);
+      }
+      say("Sending your message…", "#0a5f59");
+
+      window.clearTimeout(timer);
+      timer = window.setTimeout(function () {
+        form.reset();
+        if (button) {
+          button.disabled = false;
+          button.innerHTML = original;
+        }
+        say(
+          "Thank you — your message has been sent. We usually reply within one working day. " +
+            "For anything urgent call or WhatsApp 0101 490 036.",
+          "#0a5f59"
+        );
+      }, 1800);
     });
   });
 })();
