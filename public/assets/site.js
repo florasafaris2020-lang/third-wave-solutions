@@ -27,7 +27,30 @@
     var status = form.querySelector("[id$='formStatus']") || document.getElementById("formStatus");
     var button = form.querySelector("button[type='submit']");
     var original = button ? button.innerHTML : "";
-    var endpoint = "https://formsubmit.co/ajax/" + config.email;
+    var endpoint = config.endpoint || ("https://formsubmit.co/ajax/" + config.email);
+    var isFormSubmitApp = endpoint.indexOf("https://formsubmit.app/") === 0;
+    var timestamp = config.timestampField ? form.querySelector('[name="' + config.timestampField + '"]') : null;
+    var renderedAt = String(Date.now());
+
+    if (config.endpoint) form.action = endpoint;
+    if (timestamp) timestamp.value = renderedAt;
+
+    if (config.fieldNames) {
+      Object.keys(config.fieldNames).forEach(function (id) {
+        var field = document.getElementById(id);
+        if (field) field.name = config.fieldNames[id];
+      });
+    }
+
+    if (config.gotchaName) {
+      var honeypotField = form.querySelector("input[name='_honey']");
+      if (honeypotField) {
+        honeypotField.name = config.gotchaName;
+        honeypotField.style.display = "none";
+        honeypotField.tabIndex = -1;
+        honeypotField.autocomplete = "off";
+      }
+    }
 
     function say(message, kind) {
       if (!status) return;
@@ -41,7 +64,7 @@
       if (!form.reportValidity()) return;
 
       var data = new FormData(form);
-      if (data.get("_honey")) return; // silent bot trap
+      if (data.get(config.gotchaName || "_honey")) return; // silent bot trap
 
       if (button) {
         button.disabled = true;
@@ -55,17 +78,24 @@
         headers: { Accept: "application/json" }
       })
         .then(function (res) {
-          return res.json().then(function (body) {
+          return res.json().catch(function () { return {}; }).then(function (body) {
             return { ok: res.ok, body: body };
           });
         })
         .then(function (result) {
-          var success = result.ok && result.body && String(result.body.success) === "true";
+          var success = isFormSubmitApp
+            ? result.ok && result.body && result.body.ok === true
+            : result.ok && result.body && String(result.body.success) === "true";
+
           if (success) {
             form.reset();
-            say("Thank you — your enquiry has been sent. We usually reply within one working day. For anything urgent call 0101 490 036.", "ok");
+            if (timestamp) timestamp.value = renderedAt;
+            say("Thanks for your message. We’ll be in touch soon.", "ok");
           } else {
-            say("We could not send the form automatically. Please call or WhatsApp 0101 490 036, or email s.lakhani1@aim.com.", "error");
+            var message = isFormSubmitApp && result.body && result.body.error && result.body.error.message
+              ? result.body.error.message
+              : "We could not send the form automatically. Please call or WhatsApp 0101 490 036, or email s.lakhani1@aim.com.";
+            say(message, "error");
           }
         })
         .catch(function () {
@@ -81,7 +111,13 @@
   }
 
   var forms = [
-    { id: "enquiryForm", email: "s.lakhani1@aim.com" },
+    {
+      id: "enquiryForm",
+      endpoint: "https://formsubmit.app/f/m876hpuch8",
+      gotchaName: "_gotcha",
+      timestampField: "_ts",
+      fieldNames: { name: "name", email: "email", message: "message" }
+    },
     { id: "quoteForm", email: "s.lakhani1@aim.com" },
     { id: "listingEnquiryForm", email: "s.lakhani1@aim.com" },
     { id: "sellerForm", email: "s.lakhani1@aim.com" }
