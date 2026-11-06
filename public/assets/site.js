@@ -22,7 +22,7 @@
   var year = document.getElementById("year");
   if (year) year.textContent = new Date().getFullYear();
 
-  // Forms post to FormSubmit (https://formsubmit.co/sleek12@gmail.com).
+  // Forms post to FormSubmit (https://formsubmit.app/f/abc123).
   // FormSubmit always redirects to a fixed URL afterwards, so the form is
   // posted into a hidden iframe and the visitor stays on the page.
   var forms = document.querySelectorAll('form[action*="formsubmit.co/"]');
