@@ -22,6 +22,17 @@
   var year = document.getElementById("year");
   if (year) year.textContent = new Date().getFullYear();
 
+  // Send seller-form links to the site's FormSubmit-powered seller form instead
+  // of the retired external Google Form.
+  var sellerFormLinks = document.querySelectorAll('a[href*="docs.google.com/forms"]');
+  Array.prototype.forEach.call(sellerFormLinks, function (link) {
+    link.href = /(?:^|\/)sell\.html$/.test(window.location.pathname)
+      ? "#seller-form-short"
+      : "sell.html#seller-form-short";
+    link.removeAttribute("target");
+    link.removeAttribute("rel");
+  });
+
   // FormSubmit endpoints use a hidden iframe so visitors stay on the page.
   var forms = document.querySelectorAll(
     'form[action*="formsubmit.co/"], form[action*="formsubmit.app/"]'
