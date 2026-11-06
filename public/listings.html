@@ -1,50 +1,5 @@
-<script>
-(() => {
-  const grid = document.querySelector('.grid.grid--3');
-  if (!grid) return;
-
-  fetch('data/businesses.json', { cache: 'no-store' })
-    .then((response) => response.ok ? response.json() : [])
-    .then((items) => {
-      const approved = Array.isArray(items) ? items.filter((item) => item && item.status === 'approved') : [];
-      if (!approved.length) return;
-
-      approved.forEach((item) => {
-        const article = document.createElement('article');
-        article.className = 'card listing';
-        article.innerHTML = `
-          <div class="listing-media">
-            <img src="${item.image || 'assets/img/retail.jpg'}" alt="${escapeHtml(item.businessName || 'Approved business listing')}" loading="lazy">
-            <span class="badge">Approved listing</span>
-          </div>
-          <div class="listing-body">
-            <div class="listing-top">
-              <h3>${escapeHtml(item.businessName || 'Approved listing')}</h3>
-              <span class="ask">${escapeHtml(item.askingPrice || 'Discussed')}</span>
-            </div>
-            <span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>${escapeHtml(item.location || 'Kenya')}</span>
-            <p class="desc">${escapeHtml(item.description || 'Approved business listing.')}</p>
-            <div class="listing-meta">
-              <span>Contact <b>${escapeHtml(item.contactName || 'Seller')}</b></span>
-              <span>Phone <b>${escapeHtml(item.phone || 'Available on request')}</b></span>
-            </div>
-          </div>
-        `;
-        grid.appendChild(article);
-      });
-    })
-    .catch((error) => {
-      console.warn('Approved listings could not be loaded:', error);
-    });
-
-  function escapeHtml(value) {
-    return String(value ?? '').replace(/[&<>"']/g, (char) => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;',
-    }[char]));
-  }
-})();
-</script>
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Businesses for Sale in Kenya — Third Wave Solutions</title><meta name="description" content="Approved business listings in Kenya, with buyer-side vetting available."><link rel="icon" href="assets/favicon.svg" type="image/svg+xml"><link href="https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/styles.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="wrap"><a class="brand" href="index.html"><span class="brand-text"><span class="brand-name">Third Wave Solutions</span><span class="brand-sub">Business Sales &amp; Vetting</span></span></a><nav class="nav" id="nav" aria-label="Main"><a href="index.html">Home</a><a href="listings.html" aria-current="page">Businesses for sale</a><a href="vetting.html">Vetting &amp; fees</a><a href="sell.html">Sell your business</a><a href="index.html#contact">Contact</a></nav><div class="header-cta"><button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav">☰</button></div></div></header>
+<main id="main"><section class="page-head"><div class="wrap"><p class="breadcrumb"><a href="index.html">Home</a> / Businesses for sale</p><span class="eyebrow">Approved opportunities</span><h1>Businesses for sale in Kenya</h1><p>Only proposals reviewed and approved for publication appear here. Contact us for independent buyer-side vetting.</p></div></section><section class="section"><div class="wrap"><div id="listings" class="grid grid--3"><p id="listingsStatus" class="small muted">Loading approved listings…</p></div><div class="notice notice--gold" style="margin-top:2rem"><strong>For sellers:</strong> <a href="sell.html">Submit your business for review</a>. A listing only appears after approval.</div></div></section></main>
+<footer class="site-footer"><div class="wrap"><p>© <span id="year">2026</span> Third Wave Solutions · Nairobi, Kenya</p></div></footer><script src="assets/site.js"></script></body></html>

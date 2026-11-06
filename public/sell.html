@@ -1,61 +1,42 @@
-<!-- only the relevant form block changed -->
-<form id="sellerForm" action="/api/business-submit" method="POST" enctype="multipart/form-data" style="margin-top:.9rem;">
-  <input type="hidden" name="_subject" value="Seller submission — Third Wave Solutions website">
-  <input type="hidden" name="_template" value="table">
-  <input type="hidden" name="_captcha" value="false">
-  <div class="hp" aria-hidden="true"><label for="sehp">Leave empty</label><input id="sehp" type="text" name="_honey" tabindex="-1" autocomplete="off"></div>
-  <div class="field-row">
-    <div class="field">
-      <label for="se-name">Your name <span class="req">*</span></label>
-      <input id="se-name" name="Name" type="text" autocomplete="name" required>
-    </div>
-    <div class="field">
-      <label for="se-phone">Phone / WhatsApp <span class="req">*</span></label>
-      <input id="se-phone" name="Phone" type="tel" autocomplete="tel" required>
-    </div>
-  </div>
-  <div class="field">
-    <label for="se-email">Email address <span class="req">*</span></label>
-    <input id="se-email" name="Email" type="email" autocomplete="email" required>
-  </div>
-  <div class="field-row">
-    <div class="field">
-      <label for="se-business">Business name &amp; type <span class="req">*</span></label>
-      <input id="se-business" name="Business" type="text" placeholder="e.g. Rose Cafe — restaurant" required>
-    </div>
-    <div class="field">
-      <label for="se-location">Location</label>
-      <input id="se-location" name="Location" type="text" placeholder="e.g. Westlands, Nairobi">
-    </div>
-  </div>
-  <div class="field">
-    <label for="se-price">Asking price</label>
-    <select id="se-price" name="Asking price">
-      <option value="Not decided yet">Not decided yet</option>
-      <option>Under KES 2M</option>
-      <option>KES 2M – 5M</option>
-      <option>KES 5M – 10M</option>
-      <option>Over KES 10M</option>
-    </select>
-  </div>
-  <div class="field">
-    <label for="se-notes">About the business</label>
-    <textarea id="se-notes" name="Notes" placeholder="What the business does, monthly sales, staff, licence status and why you are selling."></textarea>
-  </div>
-  <div class="field">
-    <label for="se-docs">Business documents (optional)</label>
-    <input id="se-docs" name="Documents" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple>
-  </div>
-  <div class="field">
-    <label class="checkline" for="se-consent" style="font-weight:400;">
-      <input id="se-consent" name="Consent" type="checkbox" value="Agreed to be contacted" required>
-      <span>I agree to be contacted about selling this business. <span class="req">*</span></span>
-    </label>
-  </div>
-  <button class="btn btn--primary" type="submit">Send business details</button>
-  <div id="formStatus" class="form-note" role="status" aria-live="polite"></div>
-  <div id="formSuccess" class="form-note" style="display:none; margin-top:1rem; padding:1rem; background:#e8f6f2; border-radius:var(--radius-md);">
-    <p class="success-text" style="margin:0; font-size:0.95rem;">Thank you! Your business proposal is pending approval.</p>
-    <p class="small" style="margin:0.5rem 0 0 0; color:#0c5e5b;">We'll review your submission and email you at <a href="mailto:s.lakhani1@aim.com" style="color:#0a5f59;">s.lakhani1@aim.com</a>.</p>
-  </div>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sell Your Business — Third Wave Solutions</title>
+<meta name="description" content="Submit your business proposal confidentially for review by Third Wave Solutions.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap">
+<a class="brand" href="index.html"><span class="brand-text"><span class="brand-name">Third Wave Solutions</span><span class="brand-sub">Business Sales &amp; Vetting</span></span></a>
+<nav class="nav" id="nav" aria-label="Main"><a href="index.html">Home</a><a href="listings.html">Businesses for sale</a><a href="vetting.html">Vetting &amp; fees</a><a href="sell.html" aria-current="page">Sell your business</a><a href="index.html#contact">Contact</a></nav>
+<div class="header-cta"><button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav">☰</button></div>
+</div></header>
+<main id="main">
+<section class="page-head"><div class="wrap"><p class="breadcrumb"><a href="index.html">Home</a> / Sell your business</p><span class="eyebrow">For sellers</span><h1>Submit your business for review</h1><p>Send your proposal for review. It will not be listed until you approve the public details and publish it.</p></div></section>
+<section class="section"><div class="wrap narrow"><div class="form-card">
+<h2>Business proposal</h2>
+<p class="small muted">Please do not upload bank statements, identity documents, or other sensitive personal information.</p>
+<form id="sellerForm" action="/api/business-submit" method="POST" enctype="multipart/form-data">
+<input type="hidden" name="_honey" value="">
+<div class="field"><label for="se-name">Your name *</label><input id="se-name" name="Name" autocomplete="name" required></div>
+<div class="field"><label for="se-email">Email *</label><input id="se-email" name="Email" type="email" autocomplete="email" required></div>
+<div class="field"><label for="se-phone">Phone / WhatsApp *</label><input id="se-phone" name="Phone" type="tel" autocomplete="tel" required></div>
+<div class="field"><label for="se-business">Business name and type *</label><input id="se-business" name="Business" required maxlength="120"></div>
+<div class="field"><label for="se-location">Location</label><input id="se-location" name="Location" maxlength="120"></div>
+<div class="field"><label for="se-price">Asking price</label><input id="se-price" name="Asking price" maxlength="80"></div>
+<div class="field"><label for="se-public-description">Proposed public description *</label><textarea id="se-public-description" name="Public description" maxlength="1200" required placeholder="Write the description you would like buyers to see."></textarea></div>
+<div class="field"><label for="se-notes">Private notes for reviewer</label><textarea id="se-notes" name="Notes" maxlength="5000" placeholder="Details for review only. These notes are not published."></textarea></div>
+<div class="field"><label for="se-documents">Supporting files (PDF/JPEG/PNG/WebP, 4 MB total maximum)</label><input id="se-documents" name="Documents" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" multiple></div>
+<div class="field"><label class="checkline" for="se-consent"><input id="se-consent" name="Consent" type="checkbox" value="Agreed to be contacted" required><span>I agree to be contacted about this proposal. *</span></label></div>
+<button class="btn btn--primary" type="submit">Send business details</button><div id="formStatus" class="form-note" role="status" aria-live="polite"></div>
+</form></div></div></section>
+</main>
+<footer class="site-footer"><div class="wrap"><p>© <span id="year">2026</span> Third Wave Solutions · Nairobi, Kenya</p></div></footer>
+<script src="assets/site.js"></script>
+</body>
+</html>

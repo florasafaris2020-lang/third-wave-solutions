@@ -1,0 +1,17 @@
+name = "third-wave-solutions-review"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "BUSINESSES"
+database_name = "third-wave-businesses"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "BUSINESS_UPLOADS"
+bucket_name = "third-wave-business-uploads"
