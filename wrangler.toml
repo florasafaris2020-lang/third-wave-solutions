@@ -1,0 +1,34 @@
+name = "third-wave-solutions"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+# Static site is served from public/ by the Worker (ASSETS binding).
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "BUSINESSES"
+database_name = "third-wave-businesses"
+# Replace with the real ID printed by:
+#   npx wrangler d1 create third-wave-businesses
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+[[r2_buckets]]
+binding = "BUSINESS_UPLOADS"
+# Must match the bucket you create:
+#   npx wrangler r2 bucket create third-wave-business-uploads
+bucket_name = "third-wave-business-uploads"
+
+[vars]
+GITHUB_REPO = "florasafaris2020-lang/third-wave-solutions"
+GITHUB_BRANCH = "main"
+ADMIN_USER = "admin"
+REVIEW_EMAIL = "sleek12@gmail.com"
+EMAIL_FROM = "Third Wave Solutions <onboarding@resend.dev>"
+
+# Secrets are NOT stored here. Add them with:
+#   npx wrangler secret put APP_SECRET
+#   npx wrangler secret put ADMIN_PASSWORD
+#   npx wrangler secret put GITHUB_TOKEN
+#   npx wrangler secret put RESEND_API_KEY

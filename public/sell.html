@@ -69,21 +69,6 @@
           <h2>Submit your business details</h2>
           <p class="lead" style="font-size:1rem;">Our sellers' form asks for the essentials: what the business does, where it is, what it earns, what you are asking and what documents you hold. It takes about ten minutes and there is no obligation.</p>
 
-          <div class="card card-body" id="seller-form" style="margin:1.6rem 0; background:var(--sand); border-color:var(--sand-2);">
-            <div style="display:flex; gap:1rem; align-items:flex-start; flex-wrap:wrap; justify-content:space-between;">
-              <div style="flex:1 1 320px;">
-                <h3 style="margin-bottom:.25rem;">Sellers' business upload form</h3>
-                <p class="small muted" style="margin:0 0 .9rem;">Opens in Google Forms. Your information is submitted directly to Third Wave Solutions and is treated as confidential.</p>
-                <div class="cta-row">
-                  <a class="btn btn--primary" href="https://docs.google.com/forms/d/1ERKzIdmuAc4_dRt_z7i8HZEk59ViM8Up2IWtykcweZg/viewform" target="_blank" rel="noopener">Open the sellers' form
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
-                  </a>
-                  <a class="btn btn--ghost" href="tel:+254101490036">Rather talk? Call us</a>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <h3>What to have ready</h3>
           <ul class="checklist" style="margin-top:.8rem;">
             <li class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 13 4 4L19 7"/></svg><span>Business name, location and what you sell</span></li>
@@ -94,15 +79,10 @@
             <li class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 13 4 4L19 7"/></svg><span>Staff numbers, stock value and equipment list</span></li>
             <li class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 13 4 4L19 7"/></svg><span>Your asking price and the reason for selling</span></li>
           </ul>
-          <p class="small muted" style="margin-top:1rem;">Do not send bank statements or ID copies through the website. We will tell you a secure way to share them once we have spoken.</p>
+          <p class="small muted" style="margin-top:1rem;">Supporting documents are optional. Upload only what you are comfortable sharing; files are stored privately and used only for review.</p>
 
-          <div class="notice" style="margin-top:1.2rem;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
-            <span>If the Google Form asks you to sign in, it has not been opened for public responses. Use the short form below instead and we will send you the full document checklist.</span>
-          </div>
-
-          <h3 id="seller-form-short" style="margin-top:2rem;">Or send us the basics</h3>
-          <form id="sellerForm" action="https://formsubmit.app/f/abc123" method="POST" style="margin-top:.9rem;">
+          <h3 id="seller-form" style="margin-top:2rem;">Send us your business details</h3>
+          <form id="sellerForm" action="https://formsubmit.app/f/abc123" method="POST" enctype="multipart/form-data" data-worker-form style="margin-top:.9rem;">
             <input type="hidden" name="_subject" value="Seller submission — Third Wave Solutions website">
             <input type="hidden" name="_template" value="table">
             <input type="hidden" name="_captcha" value="false">
@@ -146,6 +126,11 @@
               <textarea id="se-notes" name="Notes" placeholder="What the business does, monthly sales, staff, licence status and why you are selling."></textarea>
             </div>
             <div class="field">
+              <label for="se-documents">Supporting documents (optional)</label>
+              <input id="se-documents" name="documents" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" multiple>
+              <p class="small muted" style="margin:.35rem 0 0;">PDF, JPG, PNG or WebP. Up to 5 files, 8 MB each. These are stored privately and only shared with the reviewer.</p>
+            </div>
+            <div class="field">
               <label class="checkline" for="se-consent" style="font-weight:400;">
                 <input id="se-consent" name="Consent" type="checkbox" value="Agreed to be contacted" required>
                 <span>I agree to be contacted about selling this business. <span class="req">*</span></span>
@@ -154,8 +139,8 @@
             <button class="btn btn--primary" type="submit">Send business details</button>
             <div id="formStatus" class="form-note" role="status" aria-live="polite"></div>
             <div id="formSuccess" class="form-note" style="display:none; margin-top:1rem; padding:1rem; background:#e8f6f2; border-radius:var(--radius-md);">
-              <p class="success-text" style="margin:0; font-size:0.95rem;">Thank you! Your business proposal is pending approval.</p>
-              <p class="small" style="margin:0.5rem 0 0 0; color:#0c5e5b;">We'll review your submission and email you at <a href="mailto:s.lakhani1@aim.com" style="color:#0a5f59;">s.lakhani1@aim.com</a>. <a id="copyHtmlBtn" style="color:#0a5f59; text-decoration:underline; cursor:pointer;" onclick="copyListingHtml();">Copy listing HTML snippet</a> so you can paste it into the <strong>Businesses for sale</strong> page.</p>
+              <p class="success-text" style="margin:0; font-size:0.95rem;">Thank you! Your business proposal is pending review.</p>
+              <p class="small" style="margin:0.5rem 0 0 0; color:#0c5e5b;">We'll review it and email you once it is approved. Approved listings are published automatically.</p>
             </div>
           </form>
 
@@ -187,7 +172,7 @@
                 <li><span>Documents</span><span>Prepared upfront</span></li>
                 <li><span>Handover</span><span>Checklist supported</span></li>
               </ul>
-              <a class="btn btn--primary btn--block" href="https://docs.google.com/forms/d/1ERKzIdmuAc4_dRt_z7i8HZEk59ViM8Up2IWtykcweZg/viewform" target="_blank" rel="noopener" style="margin-top:1.2rem;">Submit your business</a>
+              <a class="btn btn--primary btn--block" href="#seller-form" style="margin-top:1.2rem;">Submit your business</a>
               <p class="form-note">Or call / WhatsApp <a href="tel:+254101490036">0101 490 036</a>. Speak to S. Lakhani.</p>
             </div>
           </div>
@@ -273,42 +258,7 @@
     </div>
   </div>
 </footer>
+<script src="assets/config.js"></script>
 <script src="assets/site.js"></script>
-<script>
-// Generate a listing card HTML snippet from form values.
-function copyListingHtml() {
-  const name = document.getElementById('se-name')?.value || '';
-  const phone = document.getElementById('se-phone')?.value || '';
-  const email = document.getElementById('se-email')?.value || '';
-  const business = document.getElementById('se-business')?.value || '';
-  const location = document.getElementById('se-location')?.value || '';
-  const price = document.getElementById('se-price')?.value || '';
-  const notes = document.getElementById('se-notes')?.value || '';
-  
-  const card = `\n  <article class="card listing">\n    <div class="listing-media">\n      <img src="assets/img/placeholder-business.jpg" alt="${business} interior" loading="lazy">\n      <span class="badge">Sample profile</span>\n    </div>\n    <div class="listing-body">\n      <div class="listing-top">\n        <h3>${business}</h3>\n        <span class="ask">${price}</span>\n      </div>\n      <span class="loc">\n        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>${location}</span>\n      </div>\n      <p class="desc">${notes}</p>\n      <div class="listing-meta"><span>Revenue <b>—</b></span><span>Staff <b>—</b></span><span>Lease <b>—</b></span></div>\n      <a class="btn btn--ghost btn--sm" href="#listing-enquiry" style="margin-top:.9rem; align-self:flex-start;">Request full profile</a>\n    </div>\n  </article>\n`;
-  
-  const textarea = document.createElement('textarea');
-  textarea.value = card;
-  document.body.appendChild(textarea);
-  textarea.select();
-  document.execCommand('copy');
-  document.body.removeChild(textarea);
-  
-  // Show feedback
-  const btn = event.target;
-  const orig = btn.innerHTML;
-  btn.innerHTML = 'Copied!';
-  setTimeout(() => btn.innerHTML = orig, 2000);
-}
-
-// On form submit, capture values and show success with copy button
-document.getElementById('sellerForm')?.addEventListener('submit', function(e) {
-  // The form posts to FormSubmit; we just show the UI feedback.
-  const status = document.getElementById('formStatus');
-  const success = document.getElementById('formSuccess');
-  if (status) status.style.display = 'none';
-  if (success) success.style.display = 'block';
-});
-</script>
 </body>
 </html>
