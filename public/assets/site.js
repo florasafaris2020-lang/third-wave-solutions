@@ -2,7 +2,9 @@
 (function () {
   "use strict";
 
-  var sellerEndpoint = "https://formsubmit.app/f/xvfwex8rvq";
+  // Every form on the site posts to the same FormSubmit form, so all
+  // submissions land in one inbox: formsubmit.app/dashboard/forms/xvfwex8rvq
+  var formEndpoint = "https://formsubmit.app/f/xvfwex8rvq";
 
   // Mobile navigation
   var toggle = document.getElementById("menuToggle");
@@ -40,7 +42,7 @@
   // form itself; the FormSubmit endpoint receives the multipart POST directly.
   var sellerForm = document.getElementById("sellerForm");
   if (sellerForm) {
-    sellerForm.action = sellerEndpoint;
+    sellerForm.action = formEndpoint;
     sellerForm.method = "POST";
     sellerForm.enctype = "multipart/form-data";
 
@@ -75,6 +77,9 @@
   document.body.appendChild(frame);
 
   Array.prototype.forEach.call(forms, function (form) {
+    // Replace the placeholder endpoint in the markup with the live form.
+    form.action = formEndpoint;
+
     var status = form.querySelector("[id$='formStatus']") || document.getElementById("formStatus");
     var button = form.querySelector("button[type='submit']");
     var original = button ? button.innerHTML : "";
