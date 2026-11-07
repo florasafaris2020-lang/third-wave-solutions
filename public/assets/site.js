@@ -31,9 +31,8 @@
     'a[href*="docs.google.com/forms"], a[href*="formsubmit.app/f/"]'
   );
   Array.prototype.forEach.call(sellerLinks, function (link) {
-    link.href = /(?:^|\/)sell\.html$/.test(window.location.pathname)
-      ? "#seller-form-short"
-      : "sell.html#seller-form-short";
+    var onSellPage = new RegExp("(?:^|/)sell[.]html$").test(window.location.pathname);
+    link.href = onSellPage ? "#seller-form-short" : "sell.html#seller-form-short";
     link.removeAttribute("target");
     link.removeAttribute("rel");
   });
@@ -61,32 +60,29 @@
     if (legacySuccess) legacySuccess.remove();
   }
 
-  // FormSubmit endpoints use a hidden iframe so visitors stay on the page.
-  // File submissions navigate normally so the browser sends multipart data.
+  // Submit with fetch so the page can confirm FormSubmit actually accepted
+  // the submission. Sending Accept: application/json makes FormSubmit reply
+  // with JSON instead of redirecting to its thank-you page.
   var forms = document.querySelectorAll(
     'form[action*="formsubmit.co/"], form[action*="formsubmit.app/"]'
   );
   if (!forms.length) return;
 
-  var frameName = "tw-form-target";
-  var frame = document.createElement("iframe");
-  frame.name = frameName;
-  frame.title = "Form submission";
-  frame.setAttribute("aria-hidden", "true");
-  frame.style.display = "none";
-  document.body.appendChild(frame);
+  var successMessage =
+    "Thank you — your message has been sent. We usually reply within one working day. " +
+    "For anything urgent call or WhatsApp 0101 490 036.";
+  var failureMessage =
+    "Sorry — we couldn't send your message just now. Please try again, or call or " +
+    "WhatsApp 0101 490 036.";
 
   Array.prototype.forEach.call(forms, function (form) {
-    // Replace the placeholder endpoint in the markup with the live form.
+    // Keep the endpoint in the markup identical to the live form.
     form.action = formEndpoint;
 
     var status = form.querySelector("[id$='formStatus']") || document.getElementById("formStatus");
     var button = form.querySelector("button[type='submit']");
     var original = button ? button.innerHTML : "";
-    var timer = null;
     var hasFileUpload = !!form.querySelector('input[type="file"]');
-
-    if (!hasFileUpload) form.target = frameName;
 
     function say(message, color) {
       if (!status) return;
@@ -95,33 +91,57 @@
       status.style.fontWeight = "600";
     }
 
-    form.addEventListener("submit", function () {
-      if (button) {
-        button.disabled = true;
-        button.innerHTML = hasFileUpload ? "Uploading…" : "Sending…";
-      }
+    function setBusy(busy) {
+      if (!button) return;
+      button.disabled = busy;
+      button.innerHTML = busy ? (hasFileUpload ? "Uploading…" : "Sending…") : original;
+    }
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      // Guard against a double click sending the same enquiry twice.
+      if (form.getAttribute("data-sending") === "true") return;
+      form.setAttribute("data-sending", "true");
+      setBusy(true);
       say(
-        hasFileUpload ? "Uploading your files and sending your submission…" : "Sending your message…",
+        hasFileUpload
+          ? "Uploading your files and sending your submission…"
+          : "Sending your message…",
         "#0a5f59"
       );
 
-      // Do not guess whether a file upload succeeded: FormSubmit's response
-      // page is shown in this tab for upload forms.
-      if (hasFileUpload) return;
-
-      window.clearTimeout(timer);
-      timer = window.setTimeout(function () {
-        form.reset();
-        if (button) {
-          button.disabled = false;
-          button.innerHTML = original;
-        }
-        say(
-          "Thank you — your message has been sent. We usually reply within one working day. " +
-            "For anything urgent call or WhatsApp 0101 490 036.",
-          "#0a5f59"
-        );
-      }, 1800);
+      // FormData carries every field as well as any selected files.
+      fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),
+        headers: { Accept: "application/json" }
+      })
+        .then(function (response) {
+          var type = response.headers.get("content-type") || "";
+          if (type.indexOf("json") === -1) {
+            return { ok: false, error: { message: "unexpected response " + response.status } };
+          }
+          return response.json();
+        })
+        .then(function (result) {
+          form.removeAttribute("data-sending");
+          setBusy(false);
+          if (result && result.ok) {
+            form.reset();
+            say(successMessage, "#0a5f59");
+            return;
+          }
+          var detail = result && result.error && result.error.message;
+          say(detail ? failureMessage + " (" + detail + ")" : failureMessage, "#b3261e");
+        })
+        .catch(function () {
+          // The request never completed (offline or blocked). Report it instead
+          // of pretending the enquiry was delivered.
+          form.removeAttribute("data-sending");
+          setBusy(false);
+          say(failureMessage, "#b3261e");
+        });
     });
   });
 })();
