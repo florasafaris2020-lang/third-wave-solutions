@@ -1,6 +1,7 @@
 name = "third-wave-solutions"
 main = "worker.js"
 compatibility_date = "2026-10-01"
+account_id = "5e5b4ac18db2a66c877ef6c4dff760bf"
 
 # Static site is served from public/ by the Worker (ASSETS binding).
 [assets]

@@ -40,11 +40,22 @@ signed token, or `/admin/document` behind Basic Auth.
 
 ## Cloudflare setup
 
-Run these from the repository root. `wrangler.toml` already contains the D1 and R2
-bindings and the non-secret variables.
+Run these from the repository root. `wrangler.toml` already contains the account ID, the
+D1 and R2 bindings, and the non-secret variables.
+
+On a machine with a browser, authenticate once:
 
 ```bash
 npx wrangler login
+```
+
+In a remote/cloud environment without a browser, add a Cloudflare API token as the project
+secret `CLOUDFLARE_API_TOKEN` (Settings → Secrets). The token needs Workers Scripts: Edit,
+D1: Edit and R2: Edit. Do not paste the token into chat or commit it.
+
+Then create the resources:
+
+```bash
 npx wrangler r2 bucket create third-wave-business-uploads
 npx wrangler d1 create third-wave-businesses
 ```
