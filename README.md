@@ -7,7 +7,7 @@ forms. No server, no build step — plain HTML/CSS/JS published free on GitHub P
 - **Repository:** https://github.com/florasafaris2020-lang/third-wave-solutions
 - **Live site:** https://florasafaris2020-lang.github.io/third-wave-solutions/
 - **Owner dashboard:** https://florasafaris2020-lang.github.io/third-wave-solutions/admin.html
-- **Form submissions inbox:** https://formsubmit.app/dashboard
+- **Form submissions inbox:** sleek12@gmail.com (delivered by FormSubmit)
 
 Contact details used throughout: **0101 490 036** · **s.lakhani1@aim.com** · S. Lakhani.
 
@@ -15,11 +15,11 @@ Contact details used throughout: **0101 490 036** · **s.lakhani1@aim.com** · S
 
 | Step | Where | What happens |
 | --- | --- | --- |
-| 1. Seller submits | `sell.html` → FormSubmit | The seller's business upload form posts to FormSubmit. Text plus uploaded documents arrive in the FormSubmit dashboard and by email. Nothing is public. |
-| 2. You review | formsubmit.app/dashboard | Read the submission, open the uploaded files, call the seller, check KRA, licences and liabilities. |
+| 1. Seller submits | `sell.html` → FormSubmit | The seller's business upload form posts to FormSubmit. Text plus uploaded documents arrive by email, and text stays in the archive for 30 days. Nothing is public. |
+| 2. You review | your email inbox | Read the submission, open the uploaded files, call the seller, check KRA, licences and liabilities. |
 | 3. You approve & publish | `admin.html` | Sign in with a GitHub token, paste the submission, set the four vetting checks, publish. The listing is committed to `public/data/listings.json`. |
 | 4. Site updates | GitHub Pages | The workflow rebuilds in about a minute. The listing appears on `listings.html` and gets its own page at `listing.html?slug=…`. |
-| 5. Buyer enquires | `listing.html` / `listings.html` / `index.html` | Enquiries and vetting quote requests post to the same FormSubmit form. |
+| 5. Buyer enquires | `listing.html` / `listings.html` / `index.html` | Enquiries and vetting quote requests are emailed to sleek12@gmail.com through the same endpoint. |
 
 ## Pages
 
@@ -32,6 +32,7 @@ Contact details used throughout: **0101 490 036** · **s.lakhani1@aim.com** · S
 | `public/vetting.html` | Vetting scope, process, fees, FAQ, quote request form |
 | `public/business-salon.html` · `business-cafe.html` · `business-minimart.html` | Sample profiles |
 | `public/admin.html` | Private owner dashboard: review queue, listing editor, approve & publish |
+| `public/thanks.html` | Confirmation page the seller upload form returns to |
 | `public/data/listings.json` | The only source of published listings |
 | `public/404.html` | Not-found page |
 
@@ -50,8 +51,8 @@ card and cannot read or change anything.
 3. Paste the token and sign in. It is kept in `sessionStorage` (or `localStorage` if you tick
    "Remember on this device") — it is never written into the repository and is only sent to
    `api.github.com`.
-4. Put a submission into the review queue. The dashboard accepts the FormSubmit JSON or CSV
-   export, or plain `Field: value` lines pasted by hand.
+4. Put a submission into the review queue. The dashboard accepts the FormSubmit notification text
+   or plain `Field: value` lines pasted by hand.
 5. Choose **Review & approve**, edit the public wording (never name the seller or the exact
    address), set the four vetting checks, then **Approve & publish**.
    - Publishing is blocked while any check is Pending or negative. That is deliberate: the
@@ -64,61 +65,59 @@ Private approval notes (seller name, phone, documents received, fee agreed) are 
 `privateNotes` field of `data/listings.json` — that file is public, so treat it as visible. Do not
 put bank details, ID numbers or anything a seller would object to seeing online in that field.
 
-## Forms — FormSubmit setup (required now)
+## Forms — delivery to sleek12@gmail.com
 
-Every form on the site (buyer enquiry, vetting quote, listing enquiry and the seller's business
-upload form) posts to one FormSubmit form. On the free plan that is the cap: **1 form, 50
-submissions a month, 100 MB of file storage, 10 MB per file and about 4.5 MB per request**. A second
-form needs Starter ($10/month). A hidden `_subject` distinguishes seller submissions from buyer
-enquiries in the inbox.
+Every form on the site (buyer enquiry, listing enquiry, vetting quote and the seller's business
+upload) posts to FormSubmit's address endpoint for **sleek12@gmail.com**. No dashboard, no form id
+and no monthly cap — an address endpoint accepts unlimited submissions, but it must be **activated
+once** before anything is delivered.
 
-### The endpoint in the code is not a live form
+### One thing to do before it works
 
-`https://formsubmit.app/f/xvfwex8rvq` answers a POST with `form_not_found`, so submissions sent
-through it reach nobody. A form belongs to your login, so it has to be created in your dashboard —
-this cannot be done from code.
+The first submission sends an **"Activate Form"** email to sleek12@gmail.com. Until that link is
+clicked, the service answers `{"success":"false","message":"This form needs Activation…"}` and
+delivers nothing. Check the inbox (and Spam), click **Activate Form**, then submit again. On
+activation FormSubmit also emails a random alias string; put that alias in `FORM_ADDRESS` instead of
+the raw address if you would rather not print the mailbox in the page source.
 
-1. Sign in at <https://formsubmit.app/login>. Use **sleek12@gmail.com** if that is the mailbox that
-   should receive submissions; notifications go to the account email by default.
-2. **New form** → call it `Third Wave website`. Leave the builder empty: the site posts its own
-   fields to the endpoint.
-3. Copy the id — it is the last part of `https://formsubmit.app/f/<id>` (also in the dashboard URL,
-   `/dashboard/forms/<id>`).
-4. Replace the old id everywhere with one command from the repository root:
+### How the site posts
 
-   ```bash
-   grep -rl xvfwex8rvq public | xargs sed -i 's/xvfwex8rvq/<new-id>/g'
-   ```
+| Form | Endpoint | Why |
+| --- | --- | --- |
+| Buyer enquiry, listing enquiry, vetting quote | `https://formsubmit.co/ajax/sleek12@gmail.com` | Text only. Posted with `fetch`, so the visitor stays on the page and sees the inline thank-you. |
+| Seller business upload (`sell.html`) | `https://formsubmit.co/sleek12@gmail.com` | Has file inputs. Attachments survive only a native multipart post, so the browser posts directly and FormSubmit redirects to `thanks.html`. |
 
-   That updates `formEndpoint` in `public/assets/site.js` and the eight form `action` attributes in
-   `index.html`, `listings.html`, `listing.html`, `sell.html`, `vetting.html`, `business-salon.html`,
-   `business-cafe.html` and `business-minimart.html`.
-5. **Delivery** — if the account was created with a different address, add `sleek12@gmail.com` under
-   **Notifications → Recipients** and click the confirmation link it receives. An unconfirmed
-   recipient gets nothing.
-6. **Domain allowlist** — **Protection → Domain allowlist** → add
-   `florasafaris2020-lang.github.io`, plus `localhost` while previewing locally. `example.com` also
-   matches `www.example.com`; `*.example.com` matches every subdomain. While the list is non-empty,
-   any request with no `Origin`/`Referer` or a non-matching one is refused with `domain_not_allowed`.
-7. **Retention** — keep submissions that carry documents for at least 90 days.
-8. **Test** — send one buyer enquiry and one seller submission (with a small PDF) from the live
-   site. Each should show the inline thank-you, appear in the dashboard, and arrive by email.
+Both are set in `public/assets/site.js` (`FORM_ADDRESS`, `AJAX_ENDPOINT`, `PAGE_ENDPOINT`). The
+`action` attributes in the HTML still carry the old FormSubmit app endpoint; `site.js` rewrites them
+on load and picks the endpoint per form by whether it contains a file input. A visitor with
+JavaScript disabled would post to that dead endpoint, so treat `site.js` as required.
 
-Health check from a terminal (`ok:true` means the form exists; `form_not_found` means it does not):
+### Settings that matter
+
+- `_subject` — separate subjects for seller submissions and buyer enquiries.
+- `_captcha=false` — the forms carry no reCAPTCHA widget, so the captcha must stay disabled.
+- `_honey` — honeypot. Keep this exact name; `_gotcha` belongs to the other FormSubmit service and
+  is ignored here.
+- `_next` — added by `site.js` to the seller form and pointed at `thanks.html`.
+- `_template=table` — keeps the notification email readable.
+- Files: 10 MB in total per submission; `site.js` refuses over 4 MB and asks the visitor to email.
+
+### Checking it from a terminal
 
 ```bash
-curl -sS -X POST "https://formsubmit.app/f/<id>" -H "Accept: application/json" \
-  -d "_subject=Setup test" -d "Name=Setup test" -d "Email=sleek12@gmail.com"
-
-# once the allowlist is on, this one should be refused — that proves it is working
-curl -sS -X POST "https://formsubmit.app/f/<id>" -H "Accept: application/json" -d "Name=probe"
+# Success once activated: {"success":"true",...}. Before activation: "This form needs Activation".
+curl -sS -X POST "https://formsubmit.co/ajax/sleek12@gmail.com" \
+  -H "Accept: application/json" \
+  -H "Referer: https://florasafaris2020-lang.github.io/third-wave-solutions/index.html" \
+  --data-urlencode "_subject=Setup test" -d "Name=Setup test"
 ```
 
-Control fields used: `_subject` (notification subject), `_gotcha` (honeypot — `site.js` renames the
-older `_honey` inputs to it), `_ts` (render timestamp for the time-to-submit check). `_captcha` and
-`_template` are legacy and ignored. Uploads are stored privately and linked with signed links that
-expire after 7 days, so download anything you need to keep; `site.js` refuses attachments over 4 MB
-and tells the visitor to email instead.
+The `Referer` header matters: with none, FormSubmit assumes the page was opened as a local file and
+refuses with "Make sure you open this page through a web server".
+
+Submissions stay in the archive for 30 days (`https://formsubmit.co/api-documentation`, five API
+calls a day). Uploaded files are **not** in the archive — they exist only on the notification email,
+so download a seller's KRA certificate and financials as soon as it arrives.
 
 ## Editing and redeploying on GitHub
 
@@ -153,6 +152,7 @@ if you want to re-publish there, with site id `8c0d9073-2610-4f31-a107-7f1f47336
   or remove them from `data/listings.json` (or from the dashboard) once real approved listings exist.
 - Vetting fees are described as "quoted per business". Update `public/vetting.html` and the fee band
   on `public/index.html` if you publish fixed prices.
-- The public contact address shown on the site is still `s.lakhani1@aim.com`. Change it across the
-  pages if submissions should come from the same address buyers are told to email.
+- The public contact address shown on the site is still `s.lakhani1@aim.com`, while submissions are
+  delivered to `sleek12@gmail.com`. Change the address across the pages if buyers should write to the
+  same mailbox that receives form submissions.
 - Photography is from Unsplash, free to use under the Unsplash licence.
