@@ -26,38 +26,39 @@
   var year = document.getElementById("year");
   if (year) year.textContent = new Date().getFullYear();
 
-  // Route old/external seller-form buttons to the on-site seller form.
+  // Route any leftover link that points straight at the form endpoint back to
+  // the on-site seller form, so nobody lands on a bare form service page.
   var sellerLinks = document.querySelectorAll(
     'a[href*="docs.google.com/forms"], a[href*="formsubmit.app/f/"]'
   );
   Array.prototype.forEach.call(sellerLinks, function (link) {
     var onSellPage = new RegExp("(?:^|/)sell[.]html$").test(window.location.pathname);
-    link.href = onSellPage ? "#seller-form-short" : "sell.html#seller-form-short";
+    link.href = onSellPage ? "#seller-form" : "sell.html#seller-form";
     link.removeAttribute("target");
     link.removeAttribute("rel");
   });
 
-  // Configure the seller form for file uploads. Keep the upload control in the
-  // form itself; the FormSubmit endpoint receives the multipart POST directly.
+  // The seller form carries file inputs, so it must post as multipart. The
+  // upload controls live in the markup; nothing is injected here.
   var sellerForm = document.getElementById("sellerForm");
   if (sellerForm) {
     sellerForm.action = formEndpoint;
     sellerForm.method = "POST";
     sellerForm.enctype = "multipart/form-data";
+  }
 
-    var uploadField = document.createElement("div");
-    uploadField.className = "field";
-    uploadField.innerHTML =
-      '<label for="seller-files">Business photos or supporting documents (optional)</label>' +
-      '<input id="seller-files" name="Business files" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" multiple>' +
-      '<p class="small muted">Attach relevant photos or PDFs. Keep the total upload under 4 MB per submission; do not attach bank statements or ID copies.</p>';
-    var submitButton = sellerForm.querySelector('button[type="submit"]');
-    if (submitButton) sellerForm.insertBefore(uploadField, submitButton);
-
-    // Avoid displaying the page's legacy success message before FormSubmit
-    // has actually accepted the multipart submission.
-    var legacySuccess = document.getElementById("formSuccess");
-    if (legacySuccess) legacySuccess.remove();
+  // FormSubmit accepts roughly 4.5 MB per request. Warn before the visitor
+  // spends time on an upload that the endpoint will reject.
+  var MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+  function totalUploadBytes(form) {
+    var total = 0;
+    var inputs = form.querySelectorAll('input[type="file"]');
+    Array.prototype.forEach.call(inputs, function (input) {
+      Array.prototype.forEach.call(input.files || [], function (file) {
+        total += file.size;
+      });
+    });
+    return total;
   }
 
   // Submit with fetch so the page can confirm FormSubmit actually accepted
@@ -102,6 +103,16 @@
 
       // Guard against a double click sending the same enquiry twice.
       if (form.getAttribute("data-sending") === "true") return;
+
+      if (hasFileUpload && totalUploadBytes(form) > MAX_UPLOAD_BYTES) {
+        say(
+          "Those attachments are over 4 MB, which the form service cannot accept in one go. " +
+            "Please send fewer or smaller files, or email them to s.lakhani1@aim.com.",
+          "#b3261e"
+        );
+        return;
+      }
+
       form.setAttribute("data-sending", "true");
       setBusy(true);
       say(

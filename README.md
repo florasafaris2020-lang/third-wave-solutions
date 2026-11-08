@@ -1,91 +1,122 @@
 # Third Wave Solutions — website
 
-Static marketing site for Third Wave Solutions: businesses for sale, buyer-side vetting,
-seller submissions and buyer enquiry forms.
+Static site for Third Wave Solutions (S. Lakhani): businesses for sale in Kenya, independent
+buyer-side vetting, seller submissions that are reviewed before publication, and buyer enquiry
+forms. No server, no build step — plain HTML/CSS/JS published free on GitHub Pages.
 
-- **GitHub repository:** https://github.com/florasafaris2020-lang/third-wave-solutions
-- **GitHub Pages site:** https://florasafaris2020-lang.github.io/third-wave-solutions/
-- **Freebuff site:** unpublished on 1 Nov 2026 — the deployment and URLs are retained but serve nothing. GitHub Pages above is the live site.
+- **Repository:** https://github.com/florasafaris2020-lang/third-wave-solutions
+- **Live site:** https://florasafaris2020-lang.github.io/third-wave-solutions/
+- **Owner dashboard:** https://florasafaris2020-lang.github.io/third-wave-solutions/admin.html
+- **Form submissions inbox:** https://formsubmit.app/dashboard
+
+Contact details used throughout: **0101 490 036** · **s.lakhani1@aim.com** · S. Lakhani.
+
+## How the workflow fits together
+
+| Step | Where | What happens |
+| --- | --- | --- |
+| 1. Seller submits | `sell.html` → FormSubmit | The seller's business upload form posts to FormSubmit `xvfwex8rvq`. Text plus uploaded documents arrive in the FormSubmit dashboard and by email. Nothing is public. |
+| 2. You review | formsubmit.app/dashboard | Read the submission, open the uploaded files, call the seller, check KRA, licences and liabilities. |
+| 3. You approve & publish | `admin.html` | Sign in with a GitHub token, paste the submission, set the four vetting checks, publish. The listing is committed to `public/data/listings.json`. |
+| 4. Site updates | GitHub Pages | The workflow rebuilds in about a minute. The listing appears on `listings.html` and gets its own page at `listing.html?slug=…`. |
+| 5. Buyer enquires | `listing.html` / `listings.html` / `index.html` | Enquiries and vetting quote requests post to the same FormSubmit form. |
 
 ## Pages
 
 | File | Purpose |
 | --- | --- |
 | `public/index.html` | Home: hero, featured listings, vetting summary, fee band, seller CTA, buyer enquiry form |
-| `public/listings.html` | All businesses for sale + listing enquiry form |
-| `public/business-salon.html` | Sample profile with image gallery, financials, compliance checklist, enquiry form |
-| `public/business-cafe.html` | Sample profile |
-| `public/business-minimart.html` | Sample profile |
+| `public/listings.html` | Businesses for sale; the grid renders from `data/listings.json` (hand-written cards stay as a no-JS fallback) |
+| `public/listing.html` | Detail template for any approved listing: `listing.html?slug=the-slug` |
+| `public/sell.html` | Sellers' business upload form (figures, KRA, licences, liabilities, document and photo uploads) |
 | `public/vetting.html` | Vetting scope, process, fees, FAQ, quote request form |
-| `public/sell.html` | Seller page with the Google Form link + short fallback form |
+| `public/business-salon.html` · `business-cafe.html` · `business-minimart.html` | Sample profiles |
+| `public/admin.html` | Private owner dashboard: review queue, listing editor, approve & publish |
+| `public/data/listings.json` | The only source of published listings |
 | `public/404.html` | Not-found page |
 
-Contact details used throughout: **0101 490 036** · **s.lakhani1@aim.com** · S. Lakhani.
+`admin.html` is excluded in `robots.txt` and carries `noindex`. It is still a public URL, so the
+protection is the GitHub token — anyone who opens it without a valid token sees only the sign-in
+card and cannot read or change anything.
 
-## Before the forms deliver mail — required
+## Publishing from the dashboard
 
-Form submissions post to **FormSubmit** (`https://formsubmit.co/s.lakhani1@aim.com`), which
-forwards them to that address. The address is spelled out in the form `action`
-attributes on purpose: an earlier obfuscated `/el/` endpoint delivered nowhere that could
-be verified, and the plain endpoint makes the destination unambiguous.
+1. Open `admin.html`.
+2. Create a **fine-grained GitHub token**: GitHub → Settings → Developer settings →
+   Fine-grained tokens → Generate new token.
+   - Repository access: **Only select repositories → florasafaris2020-lang/third-wave-solutions**
+   - Permissions → Repository permissions → **Contents: Read and write** (nothing else)
+   - Set an expiry you are comfortable with; revoke it any time from the same page.
+3. Paste the token and sign in. It is kept in `sessionStorage` (or `localStorage` if you tick
+   "Remember on this device") — it is never written into the repository and is only sent to
+   `api.github.com`.
+4. Put a submission into the review queue. The dashboard accepts the FormSubmit JSON or CSV
+   export, or plain `Field: value` lines pasted by hand.
+5. Choose **Review & approve**, edit the public wording (never name the seller or the exact
+   address), set the four vetting checks, then **Approve & publish**.
+   - Publishing is blocked while any check is Pending or negative. That is deliberate: the
+     promise on the site is that a published listing has been checked.
+   - **Save draft** keeps a listing in this browser only, so you can come back to it.
+6. GitHub Pages rebuilds in about a minute. Live listings then appear on `listings.html` with the
+   badge **Approved listing**.
 
-FormSubmit only accepts ordinary form posts (the `/ajax/` variant is unreliable) and
-always redirects to a fixed address afterwards, ignoring `_next`. So `site.js` posts each
-form into a hidden iframe: the visitor stays on the page and the inline "message sent"
-note appears in place. Without JavaScript the browser navigates and ends up on the site
-home page instead.
+Private approval notes (seller name, phone, documents received, fee agreed) are stored in the
+`privateNotes` field of `data/listings.json` — that file is public, so treat it as visible. Do not
+put bank details, ID numbers or anything a seller would object to seeing online in that field.
 
-1. Open the live site and send one test enquiry.
-2. FormSubmit emails `s.lakhani1@aim.com` an **activation link**. Click it once.
-3. Send a second test enquiry and confirm it arrives in the inbox (check spam).
+## Forms — FormSubmit setup (required once)
 
-Until that activation is done, submissions will not be delivered. If you change the
-destination email, replace it in the form `action` attributes (seven forms) and leave the
-contact blocks on each page as they are.
+All seven forms post to the single free FormSubmit form: `https://formsubmit.app/f/xvfwex8rvq`.
 
-## Sellers' Google Form — required
+The free FormSubmit plan allows **1 form, 50 submissions a month, 100 MB of files, 10 MB per file
+and about 4.5 MB per request**. Keep the single-form design: a second form needs the Starter plan
+($10/month). Each submission carries a hidden `_subject`, so seller submissions, buyer enquiries
+and vetting quote requests are distinguishable in the inbox.
 
-The seller link is
-`https://docs.google.com/forms/d/1ERKzIdmuAc4_dRt_z7i8HZEk59ViM8Up2IWtykcweZg/viewform`.
+Checklist in the FormSubmit dashboard (https://formsubmit.app/dashboard):
 
-At the time of building, this form required a Google sign-in (it is not shared publicly).
-In Google Forms, open the form → **Send** → link icon → **Anyone with the link** (viewer is
-not enough, respondents need access) and copy the resulting `/d/e/...` link. Replace the two
-`docs.google.com/forms/...` links in `public/index.html` and `public/sell.html` (and the
-`public/listings.html` seller link, if used) with it. Until then, the short "Or send us the
-basics" form on the seller page captures submissions by email.
+1. **Notifications** — make sure they go to `s.lakhani1@aim.com` (add it as a verified recipient if
+   the form was created under a different login address).
+2. **Domain allowlist** — add `florasafaris2020-lang.github.io` so only your site can post to the
+   form. Leave it empty only while testing.
+3. **Retention** — submissions with documents are worth keeping for at least 90 days.
+4. Send one test enquiry from the live site and confirm it arrives (check spam).
+
+File notes: uploads are stored privately by FormSubmit and linked with signed links that expire
+after 7 days, so download the documents you need to keep. `site.js` blocks a submission whose
+attachments exceed 4 MB and tells the visitor to email instead.
 
 ## Editing and redeploying on GitHub
 
-Every push to `main` publishes `public/` through `.github/workflows/pages.yml` using GitHub
-Pages (Settings → Pages → Source: GitHub Actions). Website files live only in `public/`;
-the workflow uploads that folder, so the Worker files are ignored by Pages.
+Every push to `main` publishes `public/` through `.github/workflows/pages.yml` (Settings → Pages →
+Source: GitHub Actions). Only `public/` is uploaded, so `worker.js` and `deploy.json` are ignored by
+Pages.
 
 ```bash
 git add -A && git commit -m "Update site copy" && git push origin HEAD:main
 ```
 
-The Pages build takes about a minute; progress is under the repo's **Actions** tab.
+The build takes about a minute; progress is under the repository's **Actions** tab.
 
-## Editing and redeploying on Freebuff Sites
-
-All content is plain HTML/CSS/JS in `public/`. Images are in `public/assets/img/`.
-`deploy.json` describes the deployment: `worker.js` serves the static assets from
-`public/` and returns `404.html` for unknown paths.
-
-Local preview:
+## Local preview
 
 ```bash
 python3 -m http.server 3000 --bind 0.0.0.0 --directory public
 ```
 
-Deploy with the Sites tools using the existing `deploy.json` manifest and site id
-`8c0d9073-2610-4f31-a107-7f1f47336f19` (new `requestId` per change).
+Then open `http://localhost:3000/`. `admin.html` works locally too — GitHub Pages and the GitHub API
+allow `localhost` origins; publishing from a local preview writes to the same `main` branch.
+
+## Optional: Freebuff Sites deployment
+
+`deploy.json` + `worker.js` still describe a Cloudflare Worker that serves `public/` and returns
+`404.html`. That deployment is currently unpublished; GitHub Pages is the live site. Only relevant
+if you want to re-publish there, with site id `8c0d9073-2610-4f31-a107-7f1f47336f19`.
 
 ## Notes
 
-- The three business profiles are clearly marked **sample profiles** with illustrative
-  figures; replace the figures, images and details when you have real listings.
-- Vetting fees are described as "quoted per business" — update `public/vetting.html` and the
-  fee band on `public/index.html` if you publish fixed prices.
-- Photography is from Unsplash and free to use under the Unsplash licence.
+- The six seeded listings are clearly marked **Sample profile** with illustrative figures. Replace
+  or remove them from `data/listings.json` (or from the dashboard) once real approved listings exist.
+- Vetting fees are described as "quoted per business". Update `public/vetting.html` and the fee band
+  on `public/index.html` if you publish fixed prices.
+- Photography is from Unsplash, free to use under the Unsplash licence.
