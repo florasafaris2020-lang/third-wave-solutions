@@ -2,9 +2,27 @@
 (function () {
   "use strict";
 
-  // Every form on the site posts to the same FormSubmit form, so all
-  // submissions land in one inbox: formsubmit.app/dashboard/forms/xvfwex8rvq
-  var formEndpoint = "https://formsubmit.app/f/xvfwex8rvq";
+  // ---------------------------------------------------------------------
+  // Form delivery — FormSubmit (formsubmit.co address endpoint)
+  //
+  // Delivery goes to the address below. There is no form id and no
+  // dashboard for this service: the first real submission emails the owner
+  // a one-click "Activate Form" link, and nothing is delivered until that
+  // link is clicked. To move to a dashboard-backed form later, change the
+  // two endpoints here (and the action attributes) to the new endpoint.
+  //
+  //   text-only forms  -> /ajax/ endpoint: JSON reply, visitor stays put
+  //   forms with files -> ordinary multipart POST plus a `_next` page,
+  //                       because attachments survive only on that path
+  // ---------------------------------------------------------------------
+  var FORM_ADDRESS = "sleek12@gmail.com";
+  var AJAX_ENDPOINT = "https://formsubmit.co/ajax/" + FORM_ADDRESS;
+  var PAGE_ENDPOINT = "https://formsubmit.co/" + FORM_ADDRESS;
+  var THANKS_URL = new URL("thanks.html", window.location.href).href;
+
+  // FormSubmit accepts up to 10 MB in total per submission; we stop well
+  // short of that so a slow connection is not wasted on a doomed upload.
+  var MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
   // Mobile navigation
   var toggle = document.getElementById("menuToggle");
@@ -26,10 +44,10 @@
   var year = document.getElementById("year");
   if (year) year.textContent = new Date().getFullYear();
 
-  // Route any leftover link that points straight at the form endpoint back to
+  // Route any leftover link that points straight at a form endpoint back to
   // the on-site seller form, so nobody lands on a bare form service page.
   var sellerLinks = document.querySelectorAll(
-    'a[href*="docs.google.com/forms"], a[href*="formsubmit.app/f/"]'
+    'a[href*="docs.google.com/forms"], a[href*="formsubmit.app/f/"], a[href*="formsubmit.co/ajax/"]'
   );
   Array.prototype.forEach.call(sellerLinks, function (link) {
     var onSellPage = new RegExp("(?:^|/)sell[.]html$").test(window.location.pathname);
@@ -38,18 +56,17 @@
     link.removeAttribute("rel");
   });
 
-  // The seller form carries file inputs, so it must post as multipart. The
-  // upload controls live in the markup; nothing is injected here.
-  var sellerForm = document.getElementById("sellerForm");
-  if (sellerForm) {
-    sellerForm.action = formEndpoint;
-    sellerForm.method = "POST";
-    sellerForm.enctype = "multipart/form-data";
+  function statusFor(form) {
+    return form.querySelector("[id$='formStatus']") || document.getElementById("formStatus");
   }
 
-  // FormSubmit accepts roughly 4.5 MB per request. Warn before the visitor
-  // spends time on an upload that the endpoint will reject.
-  var MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+  function say(node, message, colour) {
+    if (!node) return;
+    node.textContent = message;
+    node.style.color = colour;
+    node.style.fontWeight = "600";
+  }
+
   function totalUploadBytes(form) {
     var total = 0;
     var inputs = form.querySelectorAll('input[type="file"]');
@@ -61,9 +78,6 @@
     return total;
   }
 
-  // Submit with fetch so the page can confirm FormSubmit actually accepted
-  // the submission. Sending Accept: application/json makes FormSubmit reply
-  // with JSON instead of redirecting to its thank-you page.
   var forms = document.querySelectorAll(
     'form[action*="formsubmit.co/"], form[action*="formsubmit.app/"]'
   );
@@ -77,97 +91,98 @@
     "WhatsApp 0101 490 036.";
 
   Array.prototype.forEach.call(forms, function (form) {
-    // Keep the endpoint in the markup identical to the live form.
-    form.action = formEndpoint;
-
-    // formsubmit.app calls the honeypot field _gotcha. The older pages carry a
-    // _honey input, which this service would ignore, so rename it in place.
-    Array.prototype.forEach.call(form.querySelectorAll('[name="_honey"]'), function (field) {
-      field.name = "_gotcha";
-    });
-
-    // Timestamp the moment the form was rendered so the service's
-    // time-to-submit spam check has something to compare against.
-    var renderedAt = document.createElement("input");
-    renderedAt.type = "hidden";
-    renderedAt.name = "_ts";
-    renderedAt.value = String(Date.now());
-    form.appendChild(renderedAt);
-
-    var status = form.querySelector("[id$='formStatus']") || document.getElementById("formStatus");
+    var status = statusFor(form);
     var button = form.querySelector("button[type='submit']");
     var original = button ? button.innerHTML : "";
     var hasFileUpload = !!form.querySelector('input[type="file"]');
 
-    function say(message, color) {
-      if (!status) return;
-      status.textContent = message;
-      status.style.color = color;
-      status.style.fontWeight = "600";
-    }
-
-    function setBusy(busy) {
+    function setBusy(busy, label) {
       if (!button) return;
       button.disabled = busy;
-      button.innerHTML = busy ? (hasFileUpload ? "Uploading…" : "Sending…") : original;
+      button.innerHTML = busy ? label : original;
     }
+
+    if (hasFileUpload) {
+      // Let the browser post natively so the attachments travel with the
+      // request; FormSubmit then forwards the visitor to the thanks page.
+      var nextField = form.querySelector('[name="_next"]');
+      if (!nextField) {
+        nextField = document.createElement("input");
+        nextField.type = "hidden";
+        nextField.name = "_next";
+        form.appendChild(nextField);
+      }
+      nextField.value = THANKS_URL;
+      form.action = PAGE_ENDPOINT;
+      form.method = "POST";
+      form.enctype = "multipart/form-data";
+
+      form.addEventListener("submit", function (event) {
+        var bytes = totalUploadBytes(form);
+        if (bytes > MAX_UPLOAD_BYTES) {
+          event.preventDefault();
+          say(
+            status,
+            "Those attachments are over 4 MB, which the form service cannot accept in one go. " +
+              "Please send fewer or smaller files, or email them to s.lakhani1@aim.com.",
+            "#b3261e"
+          );
+          return;
+        }
+        say(
+          status,
+          "Uploading your files — you will be taken to a confirmation page when the upload finishes…",
+          "#0a5f59"
+        );
+        setBusy(true, "Uploading…");
+      });
+      return;
+    }
+
+    // Text-only form: submit with fetch so the page can confirm the service
+    // actually accepted it, and keep the visitor on the page.
+    form.action = AJAX_ENDPOINT;
 
     form.addEventListener("submit", function (event) {
       event.preventDefault();
 
       // Guard against a double click sending the same enquiry twice.
       if (form.getAttribute("data-sending") === "true") return;
-
-      if (hasFileUpload && totalUploadBytes(form) > MAX_UPLOAD_BYTES) {
-        say(
-          "Those attachments are over 4 MB, which the form service cannot accept in one go. " +
-            "Please send fewer or smaller files, or email them to s.lakhani1@aim.com.",
-          "#b3261e"
-        );
-        return;
-      }
-
       form.setAttribute("data-sending", "true");
-      setBusy(true);
-      say(
-        hasFileUpload
-          ? "Uploading your files and sending your submission…"
-          : "Sending your message…",
-        "#0a5f59"
-      );
+      setBusy(true, "Sending…");
+      say(status, "Sending your message…", "#0a5f59");
 
-      // FormData carries every field as well as any selected files.
-      fetch(form.action, {
+      fetch(AJAX_ENDPOINT, {
         method: "POST",
-        body: new FormData(form),
+        body: new URLSearchParams(new FormData(form)),
         headers: { Accept: "application/json" }
       })
         .then(function (response) {
           var type = response.headers.get("content-type") || "";
           if (type.indexOf("json") === -1) {
-            return { ok: false, error: { message: "unexpected response " + response.status } };
+            return { success: "false", message: "unexpected response " + response.status };
           }
           return response.json();
         })
         .then(function (result) {
           form.removeAttribute("data-sending");
           setBusy(false);
-          if (result && result.ok) {
+          // FormSubmit answers {success: "true" | "false", message: "…"} —
+          // note the strings, so "false" is truthy and must be compared.
+          if (result && String(result.success) === "true") {
             form.reset();
-            // Restart the timer so a second enquiry is not judged a bot.
-            renderedAt.value = String(Date.now());
-            say(successMessage, "#0a5f59");
+            say(status, successMessage, "#0a5f59");
             return;
           }
-          var detail = result && result.error && result.error.message;
+          var detail = result && result.message;
           say(detail ? failureMessage + " (" + detail + ")" : failureMessage, "#b3261e");
         })
         .catch(function () {
-          // The request never completed (offline or blocked). Report it instead
-          // of pretending the enquiry was delivered.
+          // The request never completed (offline or blocked). Report it rather
+          // than pretending the enquiry was delivered.
           form.removeAttribute("data-sending");
           setBusy(false);
-          say(failureMessage, "#b3261e");
+          say(status, failureMessage, "#b3261e");
         });
     });
   });
