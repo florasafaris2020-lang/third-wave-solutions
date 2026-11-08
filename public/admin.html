@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Owner dashboard — Third Wave Solutions</title>
+<meta name="description" content="Private dashboard for Third Wave Solutions. Review seller submissions, approve vetting outcomes and publish listings.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  .admin-body { background: var(--sand); }
+  .admin-head { background: var(--ink); color: #eaf3f6; padding: 1.1rem 0; }
+  .admin-head .wrap { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; }
+  .admin-head h1 { color: #fff; font-size: 1.3rem; margin: 0; }
+  .admin-head .sub { color: #a9c1cb; font-size: .85rem; }
+  .admin-head a { color: #7fd4c9; }
+  .admin-main { padding: 1.6rem 0 3.5rem; }
+  .admin-status { display: none; margin-bottom: 1rem; padding: .85rem 1rem; border-radius: var(--radius); font-weight: 600; font-size: .92rem; }
+  .admin-status.show { display: block; }
+  .admin-status.ok { background: #e2f3ee; color: #0a5f59; border: 1px solid #bfe3da; }
+  .admin-status.err { background: #fdeceb; color: #8f1d15; border: 1px solid #f3cdc9; }
+  .admin-status.busy { background: #fdf3e0; color: #7a5410; border: 1px solid #f0ddb6; }
+  .admin-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1.2rem; align-items: start; }
+  @media (max-width: 940px) { .admin-grid { grid-template-columns: 1fr; } }
+  .admin-panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 1.3rem; box-shadow: var(--shadow-sm); }
+  .admin-panel + .admin-panel { margin-top: 1.2rem; }
+  .admin-panel h2 { font-size: 1.15rem; margin-bottom: .35rem; }
+  .admin-panel h3 { font-size: 1rem; margin: 1.1rem 0 .45rem; }
+  .admin-panel .field { margin-bottom: .8rem; }
+  .admin-panel label { font-size: .85rem; }
+  .admin-panel input, .admin-panel select, .admin-panel textarea { font-size: .92rem; }
+  .admin-row { display: grid; gap: .7rem; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .admin-muted { color: var(--muted); font-size: .84rem; }
+  .listing-row { border: 1px solid var(--line); border-radius: var(--radius); padding: .75rem .85rem; display: flex; gap: .8rem; align-items: flex-start; justify-content: space-between; }
+  .listing-row + .listing-row { margin-top: .55rem; }
+  .listing-row strong { display: block; font-size: .95rem; }
+  .listing-row .tag { display: inline-block; margin-top: .25rem; font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: .16rem .45rem; border-radius: 99px; }
+  .tag--live { background: var(--teal-soft); color: var(--teal-dark); }
+  .tag--draft { background: #fdf3e0; color: #7a5410; }
+  .tag--sample { background: #eef1f4; color: #435a66; }
+  .row-actions { display: flex; gap: .35rem; flex-wrap: wrap; justify-content: flex-end; }
+  .row-actions button { font-size: .78rem; padding: .3rem .6rem; }
+  .btn--danger { background: #fff; border: 1px solid #e0b5b0; color: #8f1d15; }
+  .btn--danger:hover { background: #fdeceb; color: #8f1d15; }
+  .admin-check { display: grid; grid-template-columns: 1fr 1fr; gap: .1rem .8rem; }
+  .queue-item { border: 1px solid var(--line); border-left: 3px solid var(--gold); border-radius: var(--radius); padding: .8rem .9rem; }
+  .queue-item + .queue-item { margin-top: .6rem; }
+  .queue-item dl { display: grid; grid-template-columns: 8.5rem 1fr; gap: .12rem .7rem; font-size: .86rem; margin: .6rem 0; }
+  .queue-item dt { color: var(--muted); }
+  .queue-item dd { margin: 0; word-break: break-word; }
+  .queue-item .row-actions { justify-content: flex-start; margin-top: .5rem; }
+  code.snippet { background: #eef1f4; padding: .1rem .3rem; border-radius: 4px; font-size: .84rem; }
+  .checklist-input { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; }
+  @media (max-width: 620px) { .checklist-input { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body class="admin-body">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="admin-head">
+  <div class="wrap">
+    <div>
+      <h1>Third Wave Solutions — owner dashboard</h1>
+      <span class="sub" id="sessionLabel">Not signed in</span>
+    </div>
+    <div style="display:flex; gap:1rem; align-items:center;">
+      <a href="index.html">View website</a>
+      <a href="https://formsubmit.app/dashboard" target="_blank" rel="noopener">Form submissions</a>
+      <button class="btn btn--ghost btn--sm" id="signOutBtn" type="button" hidden>Sign out</button>
+    </div>
+  </div>
+</div>
+
+<main class="admin-main" id="main">
+  <div class="wrap">
+    <div class="admin-status" id="adminStatus" role="status" aria-live="polite"></div>
+
+    <!-- ---------------- sign in ---------------- -->
+    <section class="admin-panel" id="loginPanel">
+      <h2>Sign in to publish listings</h2>
+      <p class="admin-muted" style="margin-bottom:1rem;">
+        Publishing writes to your GitHub repository, so the dashboard signs in with a GitHub
+        <strong>fine-grained personal access token</strong> instead of a password. Create one for this
+        repository only, with <strong>Contents: Read and write</strong> permission.
+      </p>
+      <ol class="admin-muted" style="margin:0 0 1rem 1.1rem; line-height:1.7;">
+        <li>Open <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener">GitHub → Settings → Developer settings → Fine-grained tokens</a>.</li>
+        <li><em>Generate new token</em>: name it <code class="snippet">Third Wave website</code>, set an expiry, and under <em>Repository access</em> choose <strong>Only select repositories → florasafaris2020-lang/third-wave-solutions</strong>.</li>
+        <li>Under <em>Permissions → Repository permissions</em> set <strong>Contents</strong> to <strong>Read and write</strong>. Nothing else is needed.</li>
+        <li>Generate, copy the token, and paste it below. It stays in this browser and is never sent anywhere except GitHub.</li>
+      </ol>
+      <div class="field">
+        <label for="tokenInput">GitHub token</label>
+        <input id="tokenInput" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+      </div>
+      <label class="checkline" for="rememberInput" style="font-weight:400; margin-bottom:.8rem; display:flex; gap:.5rem; align-items:center;">
+        <input id="rememberInput" type="checkbox">
+        <span class="admin-muted">Remember on this device (only tick this on a computer you control)</span>
+      </label>
+      <div style="display:flex; gap:.6rem; flex-wrap:wrap;">
+        <button class="btn btn--primary" id="signInBtn" type="button">Sign in</button>
+        <a class="btn btn--ghost" href="https://formsubmit.app/dashboard" target="_blank" rel="noopener">Review submissions in FormSubmit</a>
+      </div>
+      <p class="admin-muted" style="margin-top:1rem;">
+        Seller submissions and uploaded documents arrive in the FormSubmit dashboard
+        (<a href="https://formsubmit.app/dashboard" target="_blank" rel="noopener">formsubmit.app/dashboard</a>)
+        and by email to s.lakhani1@aim.com. Approve the business there, then publish it here.
+        Revoke the token at any time from the same GitHub settings page.
+      </p>
+    </section>
+
+    <!-- ---------------- dashboard ---------------- -->
+    <div id="appPanel" hidden>
+      <div class="admin-grid">
+        <div>
+          <!-- submissions queue -->
+          <section class="admin-panel">
+            <h2>1. Seller submissions awaiting approval</h2>
+            <p class="admin-muted">
+              Paste the seller form submission (FormSubmit export as JSON or CSV, or type it out).
+              Each submission is only a proposal — nothing is public until you approve and publish it.
+            </p>
+            <div class="field">
+              <label for="pasteInput">Paste submission data</label>
+              <textarea id="pasteInput" rows="5" placeholder='{"Business":"Rose Cafe","Name":"Jane","Phone":"07…","Email":"…","Location":"Westlands","Asking price":"KES 2.5M","Monthly sales":"KES 180000","Monthly profit":"KES 60000"} — or a CSV row, or plain lines like "Business: Rose Cafe"'></textarea>
+            </div>
+            <div style="display:flex; gap:.6rem; flex-wrap:wrap;">
+              <button class="btn btn--primary btn--sm" id="parseBtn" type="button">Add to review queue</button>
+              <button class="btn btn--ghost btn--sm" id="clearQueueBtn" type="button">Clear queue</button>
+            </div>
+            <div id="queueList" style="margin-top:1rem;"></div>
+          </section>
+
+          <!-- listings -->
+          <section class="admin-panel">
+            <h2>2. Listings on the website</h2>
+            <p class="admin-muted">Published listings appear on <a href="listings.html" target="_blank" rel="noopener">Businesses for sale</a> within about a minute of publishing.</p>
+            <div id="listingList" style="margin-top:1rem;"></div>
+            <div style="margin-top:1rem; display:flex; gap:.6rem; flex-wrap:wrap;">
+              <button class="btn btn--primary btn--sm" id="newListingBtn" type="button">Add a listing manually</button>
+              <button class="btn btn--ghost btn--sm" id="reloadBtn" type="button">Reload from GitHub</button>
+            </div>
+          </section>
+        </div>
+
+        <div>
+          <!-- editor -->
+          <section class="admin-panel" id="editorPanel">
+            <h2>3. Approve &amp; publish</h2>
+            <p class="admin-muted" id="editorHint">Pick a queued submission or add a listing manually to start.</p>
+
+            <form id="listingForm" hidden>
+              <div class="field">
+                <label for="f-title">Public title <span class="req">*</span></label>
+                <input id="f-title" type="text" placeholder="e.g. Café &amp; Bistro — Westlands" required>
+              </div>
+              <div class="admin-row">
+                <div class="field">
+                  <label for="f-category">Category</label>
+                  <input id="f-category" type="text" placeholder="Food &amp; beverage">
+                </div>
+                <div class="field">
+                  <label for="f-location">Location shown publicly</label>
+                  <input id="f-location" type="text" placeholder="Westlands, Nairobi">
+                </div>
+              </div>
+              <div class="admin-row">
+                <div class="field">
+                  <label for="f-ask">Asking price</label>
+                  <input id="f-ask" type="text" placeholder="KES 5.2M">
+                </div>
+                <div class="field">
+                  <label for="f-revenue">Revenue</label>
+                  <input id="f-revenue" type="text" placeholder="KES 310K/mo">
+                </div>
+                <div class="field">
+                  <label for="f-cashflow">Cash flow / profit</label>
+                  <input id="f-cashflow" type="text" placeholder="KES 96K/mo">
+                </div>
+              </div>
+              <div class="admin-row">
+                <div class="field">
+                  <label for="f-staff">Staff</label>
+                  <input id="f-staff" type="text" placeholder="9">
+                </div>
+                <div class="field">
+                  <label for="f-lease">Lease</label>
+                  <input id="f-lease" type="text" placeholder="2 yrs">
+                </div>
+                <div class="field">
+                  <label for="f-extra">Extra fact (optional)</label>
+                  <input id="f-extra" type="text" placeholder="Stock: Included">
+                </div>
+              </div>
+              <div class="field">
+                <label for="f-summary">Public summary</label>
+                <textarea id="f-summary" rows="3" placeholder="What the business does, its trade and what is included in the sale. Do not name the seller or the exact address."></textarea>
+              </div>
+              <div class="admin-row">
+                <div class="field">
+                  <label for="f-image">Image path</label>
+                  <input id="f-image" type="text" placeholder="assets/img/cafe.jpg">
+                </div>
+                <div class="field">
+                  <label for="f-badge">Badge</label>
+                  <select id="f-badge">
+                    <option>Approved listing</option>
+                    <option>Vetted listing</option>
+                    <option>Sample profile</option>
+                  </select>
+                </div>
+              </div>
+
+              <h3>Vetting outcome (only publish what you can stand behind)</h3>
+              <div class="checklist-input">
+                <div class="field">
+                  <label for="f-check-cashflow">Cash flow</label>
+                  <select id="f-check-cashflow">
+                    <option value="Verified">Verified from records</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Not verified">Not verified</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="f-check-kra">KRA position</label>
+                  <select id="f-check-kra">
+                    <option value="Compliant">Compliant (TCC held)</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Not compliant">Not compliant</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="f-check-licences">Licences &amp; permits</label>
+                  <select id="f-check-licences">
+                    <option value="Current">Current</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Missing">Missing</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="f-check-liabilities">Hidden liabilities</label>
+                  <select id="f-check-liabilities">
+                    <option value="None">None found</option>
+                    <option value="Disclosed">Disclosed, see notes</option>
+                    <option value="Pending">Still checking</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="f-notes">Private approval notes (never published)</label>
+                <textarea id="f-notes" rows="2" placeholder="Seller name, phone, documents received, fee agreed, anything a buyer must be told."></textarea>
+              </div>
+
+              <div style="display:flex; gap:.6rem; flex-wrap:wrap; margin-top:.6rem;">
+                <button class="btn btn--primary" id="publishBtn" type="submit">Approve &amp; publish</button>
+                <button class="btn btn--ghost" id="draftBtn" type="button">Save draft (this browser)</button>
+                <button class="btn btn--ghost" id="cancelEditBtn" type="button">Cancel</button>
+              </div>
+              <p class="admin-muted" style="margin-top:.7rem;">
+                Publishing needs all four checks set to a positive value. Saving a draft keeps the listing
+                private to this browser until you publish it.
+              </p>
+            </form>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="assets/admin.js"></script>
+</body>
+</html>
