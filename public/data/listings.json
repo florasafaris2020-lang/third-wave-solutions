@@ -1,0 +1,157 @@
+{
+  "version": 1,
+  "updated": "2026-11-08",
+  "notice": "Sample profiles are illustrative and are not offers for sale. Live listings are added from admin.html only after Third Wave Solutions has reviewed and approved the seller's submission.",
+  "listings": [
+    {
+      "slug": "salon-and-beauty-spa-kiambu-road",
+      "title": "Salon & Beauty Spa",
+      "category": "Beauty & personal care",
+      "location": "Kiambu Road, Nairobi",
+      "ask": "KES 3.8M",
+      "revenue": "KES 145K/mo",
+      "cashflow": "KES 52K/mo",
+      "staff": "5",
+      "lease": "3 yrs",
+      "summary": "Eight-station salon and spa with repeat clientele, four employed stylists and a three-year lease.",
+      "image": "assets/img/salon.jpg",
+      "page": "business-salon.html",
+      "status": "published",
+      "badge": "Sample profile",
+      "type": "sample",
+      "checks": {
+        "cashflow": "Sample data",
+        "kra": "Sample data",
+        "licences": "Sample data",
+        "liabilities": "Sample data"
+      },
+      "published": "2026-11-01"
+    },
+    {
+      "slug": "cafe-and-bistro-westlands",
+      "title": "Café & Bistro",
+      "category": "Food & beverage",
+      "location": "Westlands, Nairobi",
+      "ask": "KES 5.2M",
+      "revenue": "KES 310K/mo",
+      "cashflow": "KES 96K/mo",
+      "staff": "9",
+      "lease": "2 yrs",
+      "summary": "Daytime café with corporate lunch trade, delivery accounts and a fully fitted kitchen.",
+      "image": "assets/img/cafe.jpg",
+      "page": "business-cafe.html",
+      "status": "published",
+      "badge": "Sample profile",
+      "type": "sample",
+      "checks": {
+        "cashflow": "Sample data",
+        "kra": "Sample data",
+        "licences": "Sample data",
+        "liabilities": "Sample data"
+      },
+      "published": "2026-11-01"
+    },
+    {
+      "slug": "mini-mart-and-wholesale-thika-road",
+      "title": "Mini-mart & Wholesale",
+      "category": "Retail & wholesale",
+      "location": "Thika Road, Nairobi",
+      "ask": "KES 4.5M",
+      "revenue": "KES 900K/mo",
+      "cashflow": "KES 140K/mo",
+      "staff": "6",
+      "extra": {
+        "label": "Stock",
+        "value": "Included"
+      },
+      "summary": "Retail and wholesale outlet with supplier credit lines, high footfall and stock included.",
+      "image": "assets/img/retail.jpg",
+      "page": "business-minimart.html",
+      "status": "published",
+      "badge": "Sample profile",
+      "type": "sample",
+      "checks": {
+        "cashflow": "Sample data",
+        "kra": "Sample data",
+        "licences": "Sample data",
+        "liabilities": "Sample data"
+      },
+      "published": "2026-11-01"
+    },
+    {
+      "slug": "bakery-and-confectionery-kikuyu",
+      "title": "Bakery & Confectionery",
+      "category": "Food & beverage",
+      "location": "Kikuyu, Kiambu County",
+      "ask": "KES 2.9M",
+      "revenue": "KES 210K/mo",
+      "cashflow": "KES 61K/mo",
+      "staff": "4",
+      "extra": {
+        "label": "Equipment",
+        "value": "Included"
+      },
+      "summary": "Neighbourhood bakery supplying three hotels and two schools, with equipment included in the sale.",
+      "image": "assets/img/bakery.jpg",
+      "status": "published",
+      "badge": "Sample profile",
+      "type": "sample",
+      "checks": {
+        "cashflow": "Sample data",
+        "kra": "Sample data",
+        "licences": "Sample data",
+        "liabilities": "Sample data"
+      },
+      "published": "2026-11-01"
+    },
+    {
+      "slug": "hardware-and-building-supplies-ruiru",
+      "title": "Hardware & Building Supplies",
+      "category": "Retail & wholesale",
+      "location": "Ruiru, Kiambu County",
+      "ask": "KES 6.4M",
+      "revenue": "KES 1.1M/mo",
+      "cashflow": "KES 165K/mo",
+      "staff": "7",
+      "lease": "5 yrs",
+      "summary": "Hardware yard serving contractors and walk-in customers, with a long lease and trained counter staff.",
+      "image": "assets/img/pos.jpg",
+      "status": "published",
+      "badge": "Sample profile",
+      "type": "sample",
+      "checks": {
+        "cashflow": "Sample data",
+        "kra": "Sample data",
+        "licences": "Sample data",
+        "liabilities": "Sample data"
+      },
+      "published": "2026-11-01"
+    },
+    {
+      "slug": "supermarket-ruiru-juja-corridor",
+      "title": "Supermarket — Satellite Town",
+      "category": "Retail & wholesale",
+      "location": "Ruiru / Juja corridor",
+      "ask": "KES 12M",
+      "revenue": "KES 2.4M/mo",
+      "cashflow": "KES 310K/mo",
+      "staff": "16",
+      "extra": {
+        "label": "Tills",
+        "value": "4"
+      },
+      "summary": "Four-till supermarket with a growing estate catchment, supplier terms and cold-room equipment.",
+      "image": "assets/img/supermarket.jpg",
+      "status": "published",
+      "badge": "Sample profile",
+      "type": "sample",
+      "checks": {
+        "cashflow": "Sample data",
+        "kra": "Sample data",
+        "licences": "Sample data",
+        "liabilities": "Sample data"
+      },
+      "published": "2026-11-01"
+    }
+  ]
+}
