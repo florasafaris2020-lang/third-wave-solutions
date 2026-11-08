@@ -15,7 +15,7 @@ Contact details used throughout: **0101 490 036** · **s.lakhani1@aim.com** · S
 
 | Step | Where | What happens |
 | --- | --- | --- |
-| 1. Seller submits | `sell.html` → FormSubmit | The seller's business upload form posts to FormSubmit `xvfwex8rvq`. Text plus uploaded documents arrive in the FormSubmit dashboard and by email. Nothing is public. |
+| 1. Seller submits | `sell.html` → FormSubmit | The seller's business upload form posts to FormSubmit. Text plus uploaded documents arrive in the FormSubmit dashboard and by email. Nothing is public. |
 | 2. You review | formsubmit.app/dashboard | Read the submission, open the uploaded files, call the seller, check KRA, licences and liabilities. |
 | 3. You approve & publish | `admin.html` | Sign in with a GitHub token, paste the submission, set the four vetting checks, publish. The listing is committed to `public/data/listings.json`. |
 | 4. Site updates | GitHub Pages | The workflow rebuilds in about a minute. The listing appears on `listings.html` and gets its own page at `listing.html?slug=…`. |
@@ -64,27 +64,61 @@ Private approval notes (seller name, phone, documents received, fee agreed) are 
 `privateNotes` field of `data/listings.json` — that file is public, so treat it as visible. Do not
 put bank details, ID numbers or anything a seller would object to seeing online in that field.
 
-## Forms — FormSubmit setup (required once)
+## Forms — FormSubmit setup (required now)
 
-All seven forms post to the single free FormSubmit form: `https://formsubmit.app/f/xvfwex8rvq`.
+Every form on the site (buyer enquiry, vetting quote, listing enquiry and the seller's business
+upload form) posts to one FormSubmit form. On the free plan that is the cap: **1 form, 50
+submissions a month, 100 MB of file storage, 10 MB per file and about 4.5 MB per request**. A second
+form needs Starter ($10/month). A hidden `_subject` distinguishes seller submissions from buyer
+enquiries in the inbox.
 
-The free FormSubmit plan allows **1 form, 50 submissions a month, 100 MB of files, 10 MB per file
-and about 4.5 MB per request**. Keep the single-form design: a second form needs the Starter plan
-($10/month). Each submission carries a hidden `_subject`, so seller submissions, buyer enquiries
-and vetting quote requests are distinguishable in the inbox.
+### The endpoint in the code is not a live form
 
-Checklist in the FormSubmit dashboard (https://formsubmit.app/dashboard):
+`https://formsubmit.app/f/xvfwex8rvq` answers a POST with `form_not_found`, so submissions sent
+through it reach nobody. A form belongs to your login, so it has to be created in your dashboard —
+this cannot be done from code.
 
-1. **Notifications** — make sure they go to `s.lakhani1@aim.com` (add it as a verified recipient if
-   the form was created under a different login address).
-2. **Domain allowlist** — add `florasafaris2020-lang.github.io` so only your site can post to the
-   form. Leave it empty only while testing.
-3. **Retention** — submissions with documents are worth keeping for at least 90 days.
-4. Send one test enquiry from the live site and confirm it arrives (check spam).
+1. Sign in at <https://formsubmit.app/login>. Use **sleek12@gmail.com** if that is the mailbox that
+   should receive submissions; notifications go to the account email by default.
+2. **New form** → call it `Third Wave website`. Leave the builder empty: the site posts its own
+   fields to the endpoint.
+3. Copy the id — it is the last part of `https://formsubmit.app/f/<id>` (also in the dashboard URL,
+   `/dashboard/forms/<id>`).
+4. Replace the old id everywhere with one command from the repository root:
 
-File notes: uploads are stored privately by FormSubmit and linked with signed links that expire
-after 7 days, so download the documents you need to keep. `site.js` blocks a submission whose
-attachments exceed 4 MB and tells the visitor to email instead.
+   ```bash
+   grep -rl xvfwex8rvq public | xargs sed -i 's/xvfwex8rvq/<new-id>/g'
+   ```
+
+   That updates `formEndpoint` in `public/assets/site.js` and the eight form `action` attributes in
+   `index.html`, `listings.html`, `listing.html`, `sell.html`, `vetting.html`, `business-salon.html`,
+   `business-cafe.html` and `business-minimart.html`.
+5. **Delivery** — if the account was created with a different address, add `sleek12@gmail.com` under
+   **Notifications → Recipients** and click the confirmation link it receives. An unconfirmed
+   recipient gets nothing.
+6. **Domain allowlist** — **Protection → Domain allowlist** → add
+   `florasafaris2020-lang.github.io`, plus `localhost` while previewing locally. `example.com` also
+   matches `www.example.com`; `*.example.com` matches every subdomain. While the list is non-empty,
+   any request with no `Origin`/`Referer` or a non-matching one is refused with `domain_not_allowed`.
+7. **Retention** — keep submissions that carry documents for at least 90 days.
+8. **Test** — send one buyer enquiry and one seller submission (with a small PDF) from the live
+   site. Each should show the inline thank-you, appear in the dashboard, and arrive by email.
+
+Health check from a terminal (`ok:true` means the form exists; `form_not_found` means it does not):
+
+```bash
+curl -sS -X POST "https://formsubmit.app/f/<id>" -H "Accept: application/json" \
+  -d "_subject=Setup test" -d "Name=Setup test" -d "Email=sleek12@gmail.com"
+
+# once the allowlist is on, this one should be refused — that proves it is working
+curl -sS -X POST "https://formsubmit.app/f/<id>" -H "Accept: application/json" -d "Name=probe"
+```
+
+Control fields used: `_subject` (notification subject), `_gotcha` (honeypot — `site.js` renames the
+older `_honey` inputs to it), `_ts` (render timestamp for the time-to-submit check). `_captcha` and
+`_template` are legacy and ignored. Uploads are stored privately and linked with signed links that
+expire after 7 days, so download anything you need to keep; `site.js` refuses attachments over 4 MB
+and tells the visitor to email instead.
 
 ## Editing and redeploying on GitHub
 
@@ -119,4 +153,6 @@ if you want to re-publish there, with site id `8c0d9073-2610-4f31-a107-7f1f47336
   or remove them from `data/listings.json` (or from the dashboard) once real approved listings exist.
 - Vetting fees are described as "quoted per business". Update `public/vetting.html` and the fee band
   on `public/index.html` if you publish fixed prices.
+- The public contact address shown on the site is still `s.lakhani1@aim.com`. Change it across the
+  pages if submissions should come from the same address buyers are told to email.
 - Photography is from Unsplash, free to use under the Unsplash licence.
