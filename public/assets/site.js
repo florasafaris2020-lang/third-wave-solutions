@@ -80,6 +80,20 @@
     // Keep the endpoint in the markup identical to the live form.
     form.action = formEndpoint;
 
+    // formsubmit.app calls the honeypot field _gotcha. The older pages carry a
+    // _honey input, which this service would ignore, so rename it in place.
+    Array.prototype.forEach.call(form.querySelectorAll('[name="_honey"]'), function (field) {
+      field.name = "_gotcha";
+    });
+
+    // Timestamp the moment the form was rendered so the service's
+    // time-to-submit spam check has something to compare against.
+    var renderedAt = document.createElement("input");
+    renderedAt.type = "hidden";
+    renderedAt.name = "_ts";
+    renderedAt.value = String(Date.now());
+    form.appendChild(renderedAt);
+
     var status = form.querySelector("[id$='formStatus']") || document.getElementById("formStatus");
     var button = form.querySelector("button[type='submit']");
     var original = button ? button.innerHTML : "";
@@ -140,6 +154,8 @@
           setBusy(false);
           if (result && result.ok) {
             form.reset();
+            // Restart the timer so a second enquiry is not judged a bot.
+            renderedAt.value = String(Date.now());
             say(successMessage, "#0a5f59");
             return;
           }
