@@ -53,6 +53,19 @@
   code.snippet { background: #eef1f4; padding: .1rem .3rem; border-radius: 4px; font-size: .84rem; }
   .checklist-input { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; }
   @media (max-width: 620px) { .checklist-input { grid-template-columns: 1fr; } }
+  /* Listing image helper — see assets/admin-image.js */
+  .img-picker { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: .7rem; margin-top: .5rem; align-items: start; }
+  .img-picker-frame { position: relative; width: 132px; height: 92px; border: 1px solid var(--line); border-radius: var(--radius); background: #eef1f4; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .img-picker-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .img-picker-missing { display: none; padding: 0 .45rem; font-size: .74rem; font-weight: 700; color: #8f1d15; text-align: center; }
+  .img-picker-frame.is-missing { background: #fdeceb; border: 1px dashed #e0b5b0; }
+  .img-picker-frame.is-missing img { display: none; }
+  .img-picker-frame.is-missing .img-picker-missing { display: block; }
+  .img-picker-side { display: grid; gap: .35rem; }
+  .img-picker-state { margin: 0; font-size: .78rem; line-height: 1.35; color: var(--muted); }
+  .img-picker-state.is-good { color: #0a5f59; font-weight: 600; }
+  .img-picker-state.is-bad { color: #8f1d15; font-weight: 600; }
+  @media (max-width: 520px) { .img-picker { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body class="admin-body">
@@ -283,6 +296,7 @@
 </main>
 
 <script src="assets/admin-parse.js"></script>
+<script src="assets/admin-image.js"></script>
 <script src="assets/admin.js"></script>
 </body>
 </html>
