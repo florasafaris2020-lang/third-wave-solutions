@@ -66,7 +66,7 @@
     </div>
     <div style="display:flex; gap:1rem; align-items:center;">
       <a href="index.html">View website</a>
-      <a href="https://formsubmit.app/dashboard" target="_blank" rel="noopener">Form submissions</a>
+      <a href="https://formsubmit.app/dashboard/forms/dj2hrduj7x" target="_blank" rel="noopener">Form submissions</a>
       <button class="btn btn--ghost btn--sm" id="signOutBtn" type="button" hidden>Sign out</button>
     </div>
   </div>
@@ -75,6 +75,35 @@
 <main class="admin-main" id="main">
   <div class="wrap">
     <div class="admin-status" id="adminStatus" role="status" aria-live="polite"></div>
+
+    <!-- ---------------- review queue (works without signing in) ---------------- -->
+    <section class="admin-panel">
+      <h2>1. Seller submissions awaiting approval</h2>
+      <p class="admin-muted">
+        Paste the seller form submission exactly as the form dashboard gives it to you — nothing
+        to reformat. Each submission is only a proposal: nothing is public until you approve and
+        publish it.
+      </p>
+      <div class="field">
+        <label for="pasteInput">Paste submission data</label>
+        <textarea id="pasteInput" rows="6" placeholder='Copy the submission out of the form dashboard and paste it here — "Business: Rose Cafe" lines, a field name and its value on separate lines, a table copied with tabs, or the JSON. Control fields such as _subject and _gotcha are ignored.'></textarea>
+      </div>
+      <details class="admin-muted" style="margin:-.2rem 0 .9rem;">
+        <summary style="cursor:pointer;">What can I paste?</summary>
+        <ul style="margin:.5rem 0 0 1.1rem; line-height:1.65;">
+          <li><strong>Field name, then its value on the next line</strong> — copying a submission card usually gives this. Paste it as it comes.</li>
+          <li><strong>Field: value</strong> — one per line, e.g. <code class="snippet">Business: Rose Cafe</code>.</li>
+          <li><strong>A pasted table</strong> — select the values in the dashboard and copy; tabs are handled.</li>
+          <li><strong>JSON</strong> — a single object or an array of them; <code class="snippet">data</code>, <code class="snippet">fields</code> and <code class="snippet">values</code> wrappers are unwrapped.</li>
+        </ul>
+        <p style="margin:.6rem 0 0;">Submissions live at <a href="https://formsubmit.app/dashboard/forms/dj2hrduj7x" target="_blank" rel="noopener">this form's dashboard</a>. Uploaded documents are linked there, with links that expire after 7 days — download them when you review.</p>
+      </details>
+      <div style="display:flex; gap:.6rem; flex-wrap:wrap;">
+        <button class="btn btn--primary btn--sm" id="parseBtn" type="button">Add to review queue</button>
+        <button class="btn btn--ghost btn--sm" id="clearQueueBtn" type="button">Clear queue</button>
+      </div>
+      <div id="queueList" style="margin-top:1rem;"></div>
+    </section>
 
     <!-- ---------------- sign in ---------------- -->
     <section class="admin-panel" id="loginPanel">
@@ -100,12 +129,13 @@
       </label>
       <div style="display:flex; gap:.6rem; flex-wrap:wrap;">
         <button class="btn btn--primary" id="signInBtn" type="button">Sign in</button>
-        <a class="btn btn--ghost" href="https://formsubmit.app/dashboard" target="_blank" rel="noopener">Review submissions in FormSubmit</a>
+        <a class="btn btn--ghost" href="https://formsubmit.app/dashboard/forms/dj2hrduj7x" target="_blank" rel="noopener">Review submissions in FormSubmit</a>
       </div>
       <p class="admin-muted" style="margin-top:1rem;">
-        Seller submissions and uploaded documents arrive in the FormSubmit dashboard
-        (<a href="https://formsubmit.app/dashboard" target="_blank" rel="noopener">formsubmit.app/dashboard</a>)
-        and by email to s.lakhani1@aim.com. Approve the business there, then publish it here.
+        Seller submissions and uploaded documents arrive in this form's dashboard
+        (<a href="https://formsubmit.app/dashboard/forms/dj2hrduj7x" target="_blank" rel="noopener">formsubmit.app dashboard</a>)
+        and by email to the address set on the form. Copy a submission into
+        <strong>Paste submission data</strong> below, approve the business, then publish it here.
         Revoke the token at any time from the same GitHub settings page.
       </p>
     </section>
@@ -114,24 +144,6 @@
     <div id="appPanel" hidden>
       <div class="admin-grid">
         <div>
-          <!-- submissions queue -->
-          <section class="admin-panel">
-            <h2>1. Seller submissions awaiting approval</h2>
-            <p class="admin-muted">
-              Paste the seller form submission (FormSubmit export as JSON or CSV, or type it out).
-              Each submission is only a proposal — nothing is public until you approve and publish it.
-            </p>
-            <div class="field">
-              <label for="pasteInput">Paste submission data</label>
-              <textarea id="pasteInput" rows="5" placeholder='{"Business":"Rose Cafe","Name":"Jane","Phone":"07…","Email":"…","Location":"Westlands","Asking price":"KES 2.5M","Monthly sales":"KES 180000","Monthly profit":"KES 60000"} — or a CSV row, or plain lines like "Business: Rose Cafe"'></textarea>
-            </div>
-            <div style="display:flex; gap:.6rem; flex-wrap:wrap;">
-              <button class="btn btn--primary btn--sm" id="parseBtn" type="button">Add to review queue</button>
-              <button class="btn btn--ghost btn--sm" id="clearQueueBtn" type="button">Clear queue</button>
-            </div>
-            <div id="queueList" style="margin-top:1rem;"></div>
-          </section>
-
           <!-- listings -->
           <section class="admin-panel">
             <h2>2. Listings on the website</h2>
@@ -270,6 +282,7 @@
   </div>
 </main>
 
+<script src="assets/admin-parse.js"></script>
 <script src="assets/admin.js"></script>
 </body>
 </html>
