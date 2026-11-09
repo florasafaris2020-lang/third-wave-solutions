@@ -2,7 +2,8 @@
 
 Static site for Third Wave Solutions (S. Lakhani): businesses for sale in Kenya, independent
 buyer-side vetting, seller submissions that are reviewed before publication, and buyer enquiry
-forms. No server, no build step — plain HTML/CSS/JS published free on GitHub Pages.
+forms. No server and no framework — plain HTML/CSS/JS published free on GitHub Pages, with one
+small build step that stamps asset versions during the deploy (see **Asset versions** below).
 
 - **Repository:** https://github.com/florasafaris2020-lang/third-wave-solutions
 - **Live site:** https://florasafaris2020-lang.github.io/third-wave-solutions/
@@ -141,6 +142,23 @@ git add -A && git commit -m "Update site copy" && git push origin HEAD:main
 ```
 
 The build takes about a minute; progress is under the repository's **Actions** tab.
+
+### Asset versions (cache busting)
+
+GitHub Pages serves CSS and JS with a ten-minute cache, so an edited script can stay invisible to
+someone who has just loaded a page. Every deploy therefore stamps a content hash onto the asset
+references, and **you never write or bump a `?v=` by hand**:
+
+- `.github/scripts/version-assets.mjs` hashes each file in `public/assets` (SHA-1, first 8
+  characters) and rewrites the matching `href`/`src` values in the HTML.
+- It runs on the build runner, between Checkout and Configure Pages, so it changes the uploaded copy
+  only — the files in this repository keep plain paths such as `assets/site.js`.
+- Only files whose bytes changed get a new hash, so an untouched asset keeps its URL and its cache
+  entry across deploys.
+- Because it runs on every deploy, a new page is covered automatically. If you add another asset that
+  pages load directly, add it to `ASSETS` in that script, or it will keep a plain URL.
+- The HTML itself is still cached by Pages for about ten minutes; a static host gives no control
+  over that header, so expect that window before a change reaches a returning visitor.
 
 ## Local preview
 
