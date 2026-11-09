@@ -1,32 +1,8 @@
 {
   "version": 1,
-  "updated": "2026-11-08",
+  "updated": "2026-11-09",
   "notice": "Sample profiles are illustrative and are not offers for sale. Live listings are added from admin.html only after Third Wave Solutions has reviewed and approved the seller's submission.",
   "listings": [
-    {
-      "slug": "salon-and-beauty-spa-kiambu-road",
-      "title": "Salon & Beauty Spa",
-      "category": "Beauty & personal care",
-      "location": "Kiambu Road, Nairobi",
-      "ask": "KES 3.8M",
-      "revenue": "KES 145K/mo",
-      "cashflow": "KES 52K/mo",
-      "staff": "5",
-      "lease": "3 yrs",
-      "summary": "Eight-station salon and spa with repeat clientele, four employed stylists and a three-year lease.",
-      "image": "assets/img/salon.jpg",
-      "page": "business-salon.html",
-      "status": "published",
-      "badge": "Sample profile",
-      "type": "sample",
-      "checks": {
-        "cashflow": "Sample data",
-        "kra": "Sample data",
-        "licences": "Sample data",
-        "liabilities": "Sample data"
-      },
-      "published": "2026-11-01"
-    },
     {
       "slug": "cafe-and-bistro-westlands",
       "title": "Café & Bistro",
