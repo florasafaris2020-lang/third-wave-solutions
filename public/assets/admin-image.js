@@ -112,8 +112,9 @@
     preview.onerror = function () {
       frame.classList.add("is-missing");
       state.className = "img-picker-state is-bad";
-      state.textContent =
-        "No file at " + shown + ". Commit the photo to public/assets/img, then pick it above or type its path.";
+      state.textContent = warning
+        ? warning
+        : "No file at " + shown + ". Commit the photo to public/assets/img, then pick it above or type its path.";
     };
     preview.src = shown;
   }
