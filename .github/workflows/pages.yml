@@ -24,6 +24,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Version asset URLs
+        run: node .github/scripts/version-assets.mjs
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
