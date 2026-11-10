@@ -81,7 +81,7 @@
     if (!select) return;
     var keep = [];
     Array.prototype.forEach.call(select.options, function (option, index) {
-      if (index === 0 || /full current list/i.test(option.textContent)) keep.push(option.outerHTML);
+      if (index === 0 || option.hasAttribute("data-keep") || /full current list/i.test(option.textContent)) keep.push(option.outerHTML);
     });
     var options = listings.map(function (listing) {
       var label = listing.title + (listing.location ? " — " + listing.location : "");
