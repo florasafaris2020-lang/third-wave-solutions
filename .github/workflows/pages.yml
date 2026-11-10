@@ -27,6 +27,9 @@ jobs:
       - name: Version asset URLs
         run: node .github/scripts/version-assets.mjs
 
+      - name: Add SEO head tags
+        run: node .github/scripts/seo.mjs
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 

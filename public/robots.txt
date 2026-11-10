@@ -1,2 +1,4 @@
 User-agent: *
 Disallow: /admin.html
+
+Sitemap: https://florasafaris2020-lang.github.io/third-wave-solutions/sitemap.xml
