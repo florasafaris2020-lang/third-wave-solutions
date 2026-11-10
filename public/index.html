@@ -387,18 +387,22 @@
             <div class="field-row">
               <div class="field">
                 <label for="business">Business of interest</label>
-                <select id="business" name="Business of interest">
+                <select id="business" name="Business of interest" data-listing-options>
                   <option value="Not sure yet — send me the current list">Not sure yet — send me the current list</option>
                   <option>Salon &amp; Beauty Spa — Kiambu Road</option>
                   <option>Café &amp; Bistro — Westlands</option>
                   <option>Mini-mart &amp; Wholesale — Thika Road</option>
-                  <option>Another business (described below)</option>
+                  <option>Bakery &amp; Confectionery — Kikuyu</option>
+                  <option>Hardware &amp; Building Supplies — Ruiru</option>
+                  <option>Supermarket — Ruiru / Juja corridor</option>
+                  <option data-keep>Another business (described below)</option>
                 </select>
               </div>
               <div class="field">
                 <label for="budget">Budget range</label>
                 <select id="budget" name="Budget">
-                  <option>Under KES 2M</option>
+                  <option>Under KES 1M</option>
+                  <option>KES 1M – 2M</option>
                   <option>KES 2M – 5M</option>
                   <option>KES 5M – 10M</option>
                   <option>Over KES 10M</option>
@@ -503,6 +507,7 @@
   </div>
 </footer>
 
+<script src="assets/listings.js"></script>
 <script src="assets/site.js"></script>
 </body>
 </html>
