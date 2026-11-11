@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-11-09",
+  "updated": "2026-11-11",
   "notice": "Sample profiles are illustrative and are not offers for sale. Live listings are added from admin.html only after Third Wave Solutions has reviewed and approved the seller's submission.",
   "listings": [
     {
@@ -141,7 +141,7 @@
       "lease": "5",
       "extra": null,
       "summary": "the business engages in hardware in ruaraka area.",
-      "image": "assets/img/pos.jpg",
+      "image": "assets/img/office.jpg",
       "badge": "Approved listing",
       "type": "live",
       "page": "",
