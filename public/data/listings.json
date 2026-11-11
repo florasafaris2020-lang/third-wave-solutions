@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-11-08",
+  "updated": "2026-11-11",
   "notice": "Sample profiles are illustrative and are not offers for sale. Live listings are added from admin.html only after Third Wave Solutions has reviewed and approved the seller's submission.",
   "listings": [
     {
@@ -93,29 +93,6 @@
       },
       "summary": "Neighbourhood bakery supplying three hotels and two schools, with equipment included in the sale.",
       "image": "assets/img/bakery.jpg",
-      "status": "published",
-      "badge": "Sample profile",
-      "type": "sample",
-      "checks": {
-        "cashflow": "Sample data",
-        "kra": "Sample data",
-        "licences": "Sample data",
-        "liabilities": "Sample data"
-      },
-      "published": "2026-11-01"
-    },
-    {
-      "slug": "hardware-and-building-supplies-ruiru",
-      "title": "Hardware & Building Supplies",
-      "category": "Retail & wholesale",
-      "location": "Ruiru, Kiambu County",
-      "ask": "KES 6.4M",
-      "revenue": "KES 1.1M/mo",
-      "cashflow": "KES 165K/mo",
-      "staff": "7",
-      "lease": "5 yrs",
-      "summary": "Hardware yard serving contractors and walk-in customers, with a long lease and trained counter staff.",
-      "image": "assets/img/pos.jpg",
       "status": "published",
       "badge": "Sample profile",
       "type": "sample",
