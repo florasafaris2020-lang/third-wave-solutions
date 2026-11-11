@@ -39,13 +39,36 @@
     return rows;
   }
 
+  // The photo-count pill is styled here so the shared stylesheet stays untouched,
+  // the same way the gallery styles are. Called once per rendered grid.
+  function ensureCardStyles() {
+    if (document.getElementById("listing-card-style")) return;
+    var style = document.createElement("style");
+    style.id = "listing-card-style";
+    style.textContent =
+      ".photo-count{position:absolute;right:.7rem;bottom:.7rem;display:inline-flex;align-items:center;gap:.35rem;background:rgba(10,34,48,.82);color:#fff;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.28rem .55rem;border-radius:999px}" +
+      ".photo-count svg{width:.9rem;height:.9rem}";
+    document.head.appendChild(style);
+  }
+
   function cardHTML(listing) {
     var rows = metaRows(listing).slice(0, 3);
+    // The cover counts as a photo, so a listing with two extras says "3 photos".
+    var extraPhotos = (Array.isArray(listing.photos) ? listing.photos : []).filter(function (photo) {
+      return photo && photo !== listing.image;
+    });
+    var photoCount = extraPhotos.length + 1;
+    var photoBadge = extraPhotos.length
+      ? '<span class="photo-count" aria-label="' + photoCount + ' photos in this listing">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 8h3l2-2h6l2 2h3v10H4Z"/><circle cx="12" cy="13" r="3"/></svg>' +
+        photoCount + " photos</span>"
+      : "";
     return (
       '<article class="card listing">' +
         '<div class="listing-media">' +
           '<img src="' + esc(listing.image || "assets/img/office.jpg") + '" alt="' + esc(listing.title) + '" loading="lazy">' +
           (listing.badge ? '<span class="badge">' + esc(listing.badge) + "</span>" : "") +
+          photoBadge +
         "</div>" +
         '<div class="listing-body">' +
           '<div class="listing-top"><h3>' + esc(listing.title) + "</h3>" +
@@ -69,6 +92,7 @@
   function renderGrid(listings) {
     var grid = document.querySelector("[data-listings-grid]");
     if (!grid) return;
+    ensureCardStyles();
     grid.innerHTML = listings.length
       ? listings.map(cardHTML).join("")
       : '<p class="muted">No businesses are listed publicly at the moment. ' +
