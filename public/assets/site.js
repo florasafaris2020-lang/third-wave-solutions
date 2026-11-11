@@ -74,14 +74,94 @@
     node.style.fontWeight = "600";
   }
 
-  function totalUploadBytes(form) {
+  // A phone photo is 4–8 MB each, which blows the request limit on its own, so
+  // a seller's pictures used to be the one thing that never arrived. Photos are
+  // resized in the browser before sending; documents are left exactly as they
+  // are.
+  function shrinkImage(file, maxSide, quality) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var image = new Image();
+      image.onload = function () {
+        var scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+        var width = Math.max(1, Math.round(image.naturalWidth * scale));
+        var height = Math.max(1, Math.round(image.naturalHeight * scale));
+        var canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        var context = canvas.getContext("2d");
+        // Photos with transparency go on white, not black.
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, width, height);
+        context.drawImage(image, 0, 0, width, height);
+        URL.revokeObjectURL(url);
+        canvas.toBlob(
+          function (blob) {
+            if (!blob) {
+              reject(new Error("That photo could not be prepared."));
+              return;
+            }
+            var name = String(file.name || "photo").replace(/\.[a-z0-9]+$/i, "") + ".jpg";
+            var prepared = new File([blob], name, { type: "image/jpeg", lastModified: Date.now() });
+            resolve(prepared.size < file.size ? prepared : file);
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+      image.onerror = function () {
+        URL.revokeObjectURL(url);
+        reject(new Error("not an image"));
+      };
+      image.src = url;
+    });
+  }
+
+  function formDataBytes(data) {
     var total = 0;
-    Array.prototype.forEach.call(form.querySelectorAll('input[type="file"]'), function (input) {
-      Array.prototype.forEach.call(input.files || [], function (file) {
-        total += file.size;
-      });
+    data.forEach(function (value) {
+      if (value && typeof value === "object" && typeof value.size === "number") total += value.size;
     });
     return total;
+  }
+
+  function prepareFormData(form) {
+    var data = new FormData(form);
+    var entries = [];
+    data.forEach(function (value, key) {
+      entries.push({ key: key, value: value });
+    });
+
+    // Only photos worth shrinking, and never the documents.
+    var photos = entries.filter(function (entry) {
+      return /^image\//i.test(entry.value && entry.value.type) && entry.value.size > 400 * 1024;
+    });
+
+    return photos
+      .reduce(function (chain, entry) {
+        return chain.then(function () {
+          return shrinkImage(entry.value, 1600, 0.82)
+            .then(function (prepared) {
+              entry.value = prepared;
+            })
+            .catch(function () {
+              // A format the browser cannot draw (HEIC, for instance) is sent
+              // untouched rather than silently dropped.
+            });
+        });
+      }, Promise.resolve())
+      .then(function () {
+        // Rebuilt rather than edited: FormData.set() replaces only one of
+        // several files that share a field name.
+        var rebuilt = new FormData();
+        entries.forEach(function (entry) {
+          rebuilt.append(entry.key, entry.value);
+        });
+        rebuilt.set("_ts", renderedAt);
+        var emailField = form.querySelector('input[type="email"]');
+        if (emailField && emailField.value) rebuilt.set("_replyto", emailField.value);
+        return rebuilt;
+      });
   }
 
   // FormSubmit answers {ok: true, message} or {ok: false, error: {code, message}}.
@@ -128,34 +208,34 @@
       // A double click must not send the same submission twice.
       if (form.getAttribute("data-sending") === "true") return;
 
-      var bytes = totalUploadBytes(form);
-      if (bytes > MAX_UPLOAD_BYTES) {
-        say(
-          status,
-          "Those attachments are over 4 MB, which the form cannot accept in one request. " +
-            "Please send fewer or smaller files, or email them to s.lakhani1@aim.com.",
-          "#b3261e"
-        );
-        return;
-      }
-
-      var data = new FormData(form);
-      data.set("_ts", renderedAt);
-      var emailField = form.querySelector('input[type="email"]');
-      if (emailField && emailField.value) data.set("_replyto", emailField.value);
-
       form.setAttribute("data-sending", "true");
       if (button) {
         button.disabled = true;
-        button.innerHTML = hasFiles ? "Uploading…" : "Sending…";
+        button.innerHTML = hasFiles ? "Preparing…" : "Sending…";
       }
-      say(status, hasFiles ? "Uploading your files…" : "Sending your message…", "#0a5f59");
+      say(status, hasFiles ? "Preparing your files…" : "Sending your message…", "#0a5f59");
 
-      fetch(FORM_ENDPOINT, {
-        method: "POST",
-        body: data,
-        headers: { Accept: "application/json" }
-      })
+      prepareFormData(form)
+        .then(function (data) {
+          var bytes = formDataBytes(data);
+          if (bytes > MAX_UPLOAD_BYTES) {
+            throw {
+              local: true,
+              message:
+                "Those attachments come to " +
+                Math.max(1, Math.round(bytes / (1024 * 1024))) +
+                " MB and the form accepts about 4 MB in one request. Please send fewer or smaller files, " +
+                "or email them to s.lakhani1@aim.com."
+            };
+          }
+          if (button) button.innerHTML = hasFiles ? "Uploading…" : "Sending…";
+          say(status, hasFiles ? "Uploading your files…" : "Sending your message…", "#0a5f59");
+          return fetch(FORM_ENDPOINT, {
+            method: "POST",
+            body: data,
+            headers: { Accept: "application/json" }
+          });
+        })
         .then(function (response) {
           return response.json().catch(function () {
             return null;
@@ -174,13 +254,18 @@
           }
           say(status, describeFailure(result), "#b3261e");
         })
-        .catch(function () {
+        .catch(function (error) {
           // The request never completed (offline, blocked, or a browser
-          // extension). Say so rather than pretending it was delivered.
+          // extension), or the files were still too big. Say so rather than
+          // pretending it was delivered.
           form.removeAttribute("data-sending");
           if (button) {
             button.disabled = false;
             button.innerHTML = original;
+          }
+          if (error && error.local) {
+            say(status, error.message, "#b3261e");
+            return;
           }
           say(status, failureMessage, "#b3261e");
         });
