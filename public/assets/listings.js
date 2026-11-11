@@ -90,6 +90,66 @@
     select.innerHTML = keep[0] + options.join("") + (keep[1] || "");
   }
 
+  // Extra photos are shown as thumbnails under the main picture, and each one
+  // opens the full-size file. The cover is already displayed above, so it is
+  // skipped if it also appears in the list.
+  function renderGallery(listing) {
+    var host = document.getElementById("ld-gallery");
+    if (!host) return;
+
+    var extras = (Array.isArray(listing.photos) ? listing.photos : []).filter(function (photo) {
+      return photo && photo !== listing.image;
+    });
+
+    if (!extras.length) {
+      host.hidden = true;
+      host.innerHTML = "";
+      return;
+    }
+
+    host.hidden = false;
+    host.innerHTML = extras
+      .map(function (photo, index) {
+        var alt = listing.title + " — photo " + (index + 2);
+        return (
+          '<a href="' + esc(photo) + '" target="_blank" rel="noopener" title="Open full size">' +
+          '<img src="' + esc(photo) + '" alt="' + esc(alt) + '" loading="lazy">' +
+          "</a>"
+        );
+      })
+      .join("");
+  }
+
+  // The gallery block and its styles are created here, so the listing template
+  // keeps working untouched and a listing without extra photos shows nothing.
+  function ensureGallery() {
+    var anchor = document.getElementById("ld-image");
+    if (!anchor) return;
+    var card = anchor.closest(".card");
+    if (!card || !card.parentNode) return;
+
+    if (!document.getElementById("ld-gallery")) {
+      var host = document.createElement("div");
+      host.id = "ld-gallery";
+      host.className = "listing-gallery";
+      host.hidden = true;
+      card.parentNode.insertBefore(host, card.nextSibling);
+    }
+
+    if (!document.getElementById("ld-gallery-style")) {
+      var style = document.createElement("style");
+      style.id = "ld-gallery-style";
+      style.textContent =
+        ".listing-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.6rem;margin:.8rem 0 0}" +
+        ".listing-gallery[hidden]{display:none}" +
+        ".listing-gallery a{display:block;aspect-ratio:4/3;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius);background:#eef1f4}" +
+        ".listing-gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s ease}" +
+        ".listing-gallery a:hover img,.listing-gallery a:focus-visible img{transform:scale(1.04)}" +
+        "@media (max-width:520px){.listing-gallery{grid-template-columns:repeat(auto-fill,minmax(88px,1fr))}}";
+      document.head.appendChild(style);
+    }
+  }
+
   function renderDetail(listings) {
     var root = document.querySelector("[data-listing-detail]");
     if (!root) return;
@@ -131,6 +191,9 @@
       image.src = listing.image || "assets/img/office.jpg";
       image.alt = listing.title;
     }
+
+    ensureGallery();
+    renderGallery(listing);
 
     var meta = document.getElementById("ld-meta");
     if (meta) {
