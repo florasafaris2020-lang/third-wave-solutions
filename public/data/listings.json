@@ -4,6 +4,30 @@
   "notice": "Sample profiles are illustrative and are not offers for sale. Live listings are added from admin.html only after Third Wave Solutions has reviewed and approved the seller's submission.",
   "listings": [
     {
+      "slug": "salon-and-beauty-spa-kiambu-road",
+      "title": "Salon & Beauty Spa",
+      "category": "Beauty & personal care",
+      "location": "Kiambu Road, Nairobi",
+      "ask": "KES 3.8M",
+      "revenue": "KES 145K/mo",
+      "cashflow": "KES 52K/mo",
+      "staff": "5",
+      "lease": "3 yrs",
+      "summary": "Eight-station salon and spa with repeat clientele, four employed stylists and a three-year lease.",
+      "image": "assets/img/salon.jpg",
+      "page": "business-salon.html",
+      "status": "published",
+      "badge": "Sample profile",
+      "type": "sample",
+      "checks": {
+        "cashflow": "Sample data",
+        "kra": "Sample data",
+        "licences": "Sample data",
+        "liabilities": "Sample data"
+      },
+      "published": "2026-11-01"
+    },
+    {
       "slug": "cafe-and-bistro-westlands",
       "title": "Café & Bistro",
       "category": "Food & beverage",
@@ -130,30 +154,23 @@
       "published": "2026-11-01"
     },
     {
-      "slug": "new-hardware-2",
-      "title": "New hardware",
-      "category": "Hardware & building supplies",
-      "location": "Ruaraka",
-      "ask": "Under KES 2M",
-      "revenue": "1200000",
-      "cashflow": "78000",
-      "staff": "5",
-      "lease": "5",
-      "extra": null,
-      "summary": "the business engages in hardware in ruaraka area.",
-      "image": "assets/img/office.jpg",
+      "slug": "upload-test-shop",
+      "title": "Upload Test Shop",
+      "category": "Retail & wholesale",
+      "location": "Nairobi",
+      "ask": "KES 1M",
+      "summary": "Temporary listing used to verify that a photo uploaded from the owner dashboard reaches the published listing page. Removed immediately after the test.",
+      "image": "assets/img/listing-upload-test-shop.jpg",
+      "status": "published",
       "badge": "Approved listing",
       "type": "live",
-      "page": "",
-      "status": "published",
       "checks": {
         "cashflow": "Verified",
         "kra": "Compliant",
         "licences": "Current",
         "liabilities": "None"
       },
-      "published": "2026-11-09",
-      "privateNotes": "Seller: Kamau · Phone: 0733861663 · Email: shili12000@yahoo.com · Reason for sale: retiring · KRA: PIN active, returns filed, tax compliance certificate held · Licence status: — · Liabilities: —"
+      "published": "2026-11-11"
     }
   ]
 }
