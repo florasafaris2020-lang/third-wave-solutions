@@ -90,15 +90,25 @@
     select.innerHTML = keep[0] + options.join("") + (keep[1] || "");
   }
 
-  // Extra photos are shown as thumbnails under the main picture, and each one
-  // opens the full-size file. The cover is already displayed above, so it is
-  // skipped if it also appears in the list.
+  // Every photo the listing has, cover first, as the lightbox walks them.
+  var galleryPhotos = [];
+  var lightboxState = { index: 0, opener: null };
+
+  // Extra photos are shown as thumbnails under the main picture, and clicking
+  // one opens the set in a lightbox. The cover is already displayed above, so
+  // it is skipped in the strip — but the lightbox still includes it, because a
+  // buyer flicking through wants the whole set in one place.
   function renderGallery(listing) {
     var host = document.getElementById("ld-gallery");
     if (!host) return;
 
     var extras = (Array.isArray(listing.photos) ? listing.photos : []).filter(function (photo) {
       return photo && photo !== listing.image;
+    });
+
+    galleryPhotos = [{ src: listing.image || "assets/img/office.jpg", alt: listing.title }];
+    extras.forEach(function (photo, index) {
+      galleryPhotos.push({ src: photo, alt: listing.title + " — photo " + (index + 2) });
     });
 
     if (!extras.length) {
@@ -110,14 +120,143 @@
     host.hidden = false;
     host.innerHTML = extras
       .map(function (photo, index) {
-        var alt = listing.title + " — photo " + (index + 2);
+        var position = index + 1;
         return (
-          '<a href="' + esc(photo) + '" target="_blank" rel="noopener" title="Open full size">' +
-          '<img src="' + esc(photo) + '" alt="' + esc(alt) + '" loading="lazy">' +
+          '<a class="listing-gallery-item" href="' + esc(photo) + '" data-lb-index="' + position +
+          '" aria-label="Open photo ' + (position + 1) + " of " + galleryPhotos.length + '">' +
+          '<img src="' + esc(photo) + '" alt="' + esc(galleryPhotos[position].alt) + '" loading="lazy">' +
           "</a>"
         );
       })
       .join("");
+  }
+
+  function lightbox() {
+    return document.getElementById("ld-lightbox");
+  }
+
+  function showPhoto(index) {
+    var box = lightbox();
+    if (!box || !galleryPhotos.length) return;
+    var total = galleryPhotos.length;
+    lightboxState.index = ((index % total) + total) % total;
+    var shot = galleryPhotos[lightboxState.index];
+
+    var image = box.querySelector(".lb-image");
+    image.src = shot.src;
+    image.alt = shot.alt;
+    box.querySelector(".lb-count").textContent = lightboxState.index + 1 + " of " + total;
+
+    // A single photo has nowhere to step to.
+    box.querySelector("[data-lb-prev]").hidden = total < 2;
+    box.querySelector("[data-lb-next]").hidden = total < 2;
+  }
+
+  function openLightbox(index, opener) {
+    var box = lightbox();
+    if (!box) return;
+    lightboxState.opener = opener || null;
+    showPhoto(index);
+    box.hidden = false;
+    document.body.style.overflow = "hidden";
+    box.querySelector(".lb-close").focus();
+  }
+
+  function closeLightbox() {
+    var box = lightbox();
+    if (!box || box.hidden) return;
+    box.hidden = true;
+    document.body.style.overflow = "";
+    var image = box.querySelector(".lb-image");
+    if (image) image.removeAttribute("src");
+    // Hand focus back to the thumbnail that opened it.
+    if (lightboxState.opener && document.contains(lightboxState.opener)) {
+      lightboxState.opener.focus();
+    }
+    lightboxState.opener = null;
+  }
+
+  function bindLightbox(box) {
+    if (box.getAttribute("data-bound") === "1") return;
+    box.setAttribute("data-bound", "1");
+
+    box.addEventListener("click", function (event) {
+      var target = event.target;
+      if (target.hasAttribute("data-lb-close")) {
+        closeLightbox();
+      } else if (target.hasAttribute("data-lb-prev")) {
+        showPhoto(lightboxState.index - 1);
+      } else if (target.hasAttribute("data-lb-next")) {
+        showPhoto(lightboxState.index + 1);
+      }
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (box.hidden) return;
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeLightbox();
+        return;
+      }
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        showPhoto(lightboxState.index + 1);
+        return;
+      }
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        showPhoto(lightboxState.index - 1);
+        return;
+      }
+      if (event.key === "Tab") {
+        // Keep focus inside the dialog while it is open.
+        var buttons = Array.prototype.filter.call(box.querySelectorAll("button"), function (node) {
+          return !node.hidden;
+        });
+        if (!buttons.length) return;
+        var first = buttons[0];
+        var last = buttons[buttons.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    });
+  }
+
+  function ensureLightbox() {
+    var existing = lightbox();
+    if (existing) return existing;
+
+    var box = document.createElement("div");
+    box.id = "ld-lightbox";
+    box.className = "listing-lightbox";
+    box.hidden = true;
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+    box.setAttribute("aria-label", "Listing photos");
+    box.innerHTML =
+      '<div class="lb-backdrop" data-lb-close></div>' +
+      '<div class="lb-shell">' +
+        '<button type="button" class="lb-close" data-lb-close aria-label="Close photos">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>' +
+        "</button>" +
+        '<button type="button" class="lb-nav lb-prev" data-lb-prev aria-label="Previous photo">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 5-7 7 7 7"/></svg>' +
+        "</button>" +
+        '<img class="lb-image" alt="">' +
+        '<button type="button" class="lb-nav lb-next" data-lb-next aria-label="Next photo">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg>' +
+        "</button>" +
+        '<p class="lb-count" aria-live="polite"></p>' +
+      "</div>";
+    document.body.appendChild(box);
+    bindLightbox(box);
+    return box;
   }
 
   // The gallery block and its styles are created here, so the listing template
@@ -133,8 +272,17 @@
       host.id = "ld-gallery";
       host.className = "listing-gallery";
       host.hidden = true;
+      host.addEventListener("click", function (event) {
+        var thumb = event.target.closest("[data-lb-index]");
+        if (!thumb) return;
+        // The href is the fallback for a browser that cannot open the dialog.
+        event.preventDefault();
+        openLightbox(Number(thumb.getAttribute("data-lb-index")) || 0, thumb);
+      });
       card.parentNode.insertBefore(host, card.nextSibling);
     }
+
+    ensureLightbox();
 
     if (!document.getElementById("ld-gallery-style")) {
       var style = document.createElement("style");
@@ -145,7 +293,22 @@
         ".listing-gallery a{display:block;aspect-ratio:4/3;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius);background:#eef1f4}" +
         ".listing-gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s ease}" +
         ".listing-gallery a:hover img,.listing-gallery a:focus-visible img{transform:scale(1.04)}" +
-        "@media (max-width:520px){.listing-gallery{grid-template-columns:repeat(auto-fill,minmax(88px,1fr))}}";
+        ".listing-gallery a:focus-visible{outline:2px solid var(--teal-dark);outline-offset:2px}" +
+        ".listing-lightbox{position:fixed;inset:0;z-index:120;display:grid;place-items:center}" +
+        ".listing-lightbox[hidden]{display:none}" +
+        ".lb-backdrop{position:absolute;inset:0;background:rgba(6,20,28,.9)}" +
+        ".lb-shell{position:relative;display:grid;place-items:center;padding:2.4rem;max-width:100%}" +
+        ".lb-image{max-width:min(1100px,92vw);max-height:82vh;border-radius:var(--radius);box-shadow:0 24px 60px rgba(0,0,0,.45);background:#0a2230}" +
+        ".lb-close,.lb-nav{position:absolute;border:0;background:rgba(255,255,255,.14);color:#fff;border-radius:50%;width:2.6rem;height:2.6rem;display:grid;place-items:center;cursor:pointer;transition:background .18s ease}" +
+        ".lb-close:hover,.lb-nav:hover{background:rgba(255,255,255,.3)}" +
+        ".lb-close:focus-visible,.lb-nav:focus-visible{outline:2px solid #7fd4c9;outline-offset:2px}" +
+        ".lb-close svg,.lb-nav svg{width:1.15rem;height:1.15rem}" +
+        ".lb-close{top:.2rem;right:.2rem}" +
+        ".lb-nav{top:50%;transform:translateY(-50%)}" +
+        ".lb-prev{left:.2rem}" +
+        ".lb-next{right:.2rem}" +
+        ".lb-count{position:absolute;left:50%;bottom:.2rem;transform:translateX(-50%);margin:0;color:#cfe0e7;font-size:.85rem;letter-spacing:.04em}" +
+        "@media (max-width:520px){.listing-gallery{grid-template-columns:repeat(auto-fill,minmax(88px,1fr))}.lb-shell{padding:2.2rem .4rem}.lb-nav{width:2.2rem;height:2.2rem}}";
       document.head.appendChild(style);
     }
   }
