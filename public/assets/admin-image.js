@@ -312,7 +312,7 @@
       })
       .then(function (existing) {
         var body = {
-          message: "Listing photo: " + path.replace("assets/img/", ""),
+          message: "Listing photo: " + path.replace(/^public\//, ""),
           content: base64,
           branch: BRANCH
         };
@@ -405,22 +405,26 @@
       return;
     }
 
-    var path = "assets/img/listing-" + slug + ".jpg";
+    // The file lives under public/ in the repository but is referenced
+    // without it, because GitHub Pages serves that folder as the site root.
+    var fileName = "listing-" + slug + ".jpg";
+    var repoPath = "public/assets/img/" + fileName;
+    var imagePath = "assets/img/" + fileName;
     saveButton.disabled = true;
-    uploadSay("Saving " + path + " to the repository…");
+    uploadSay("Saving " + imagePath + " to the repository…");
 
     toBase64(pending.blob)
       .then(function (base64) {
-        return commitImage(path, base64, token);
+        return commitImage(repoPath, base64, token);
       })
       .then(function () {
-        input.value = path;
+        input.value = imagePath;
         frame.classList.remove("is-missing");
         preview.onload = null;
         preview.onerror = null;
         preview.src = pendingUrl;
         state.className = "img-picker-state is-good";
-        state.textContent = path;
+        state.textContent = imagePath;
         saveButton.disabled = false;
         uploadSay(
           "Saved. GitHub Pages publishes it in about a minute — the thumbnail above is your local copy until then.",
