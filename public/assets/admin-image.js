@@ -477,7 +477,8 @@
 
   var GALLERY_HINT =
     "Optional. Each photo is resized to " + MAX_SIDE + " px and committed as listing-<slug>-g1.jpg, -g2.jpg… " +
-    "Use “Cover” to move one up to the main picture.";
+    "Use ← and → to change the order — the first photo after the cover is the one buyers see first. " +
+    "“Cover” moves one up to the main picture.";
 
   function gallerySay(text, kind) {
     galleryState.className = "img-picker-state" + (kind ? " is-" + kind : "");
@@ -513,10 +514,21 @@
     gallerySay("Cover is now " + chosen + (previous ? " — the previous main picture moved into the gallery." : "."), "good");
   }
 
+  // Reordering only changes the listing's photo list; the files stay where they are.
+  function movePhoto(index, delta) {
+    var target = index + delta;
+    if (target < 0 || target >= photos.length) return;
+    var moved = photos.splice(index, 1)[0];
+    photos.splice(target, 0, moved);
+    renderThumbs();
+    gallerySay("Order updated — " + moved + " is now gallery photo " + (target + 1) + ".", "good");
+  }
+
   function renderThumbs() {
     thumbs.innerHTML = "";
     photos.forEach(function (path, index) {
       var cell = document.createElement("div");
+      cell.style.position = "relative";
       cell.style.border = "1px solid var(--line)";
       cell.style.borderRadius = "6px";
       cell.style.overflow = "hidden";
@@ -530,11 +542,45 @@
       image.style.objectFit = "cover";
       image.style.display = "block";
 
+      // The number makes the order explicit while you shuffle photos about.
+      var order = document.createElement("span");
+      order.textContent = String(index + 1);
+      order.setAttribute("aria-hidden", "true");
+      order.style.position = "absolute";
+      order.style.top = "3px";
+      order.style.left = "3px";
+      order.style.minWidth = "1.1rem";
+      order.style.height = "1.1rem";
+      order.style.display = "grid";
+      order.style.placeItems = "center";
+      order.style.borderRadius = "999px";
+      order.style.background = "rgba(10,34,48,.82)";
+      order.style.color = "#fff";
+      order.style.fontSize = ".65rem";
+      order.style.fontWeight = "700";
+
       var actions = document.createElement("div");
       actions.style.display = "flex";
+      actions.style.flexWrap = "wrap";
       actions.style.gap = "2px";
       actions.style.padding = "2px";
       actions.style.background = "#f4f6f8";
+
+      var moveEarlier = smallButton("←", "btn--ghost");
+      moveEarlier.setAttribute("aria-label", "Move photo " + (index + 1) + " earlier");
+      moveEarlier.title = "Move earlier";
+      moveEarlier.disabled = index === 0;
+      moveEarlier.addEventListener("click", function () {
+        movePhoto(index, -1);
+      });
+
+      var moveLater = smallButton("→", "btn--ghost");
+      moveLater.setAttribute("aria-label", "Move photo " + (index + 1) + " later");
+      moveLater.title = "Move later";
+      moveLater.disabled = index === photos.length - 1;
+      moveLater.addEventListener("click", function () {
+        movePhoto(index, 1);
+      });
 
       var cover = smallButton("Cover", "btn--ghost");
       cover.addEventListener("click", function () {
@@ -548,9 +594,12 @@
         gallerySay("Removed from the listing. The file stays in the repository if you want it back.", "good");
       });
 
+      actions.appendChild(moveEarlier);
+      actions.appendChild(moveLater);
       actions.appendChild(cover);
       actions.appendChild(remove);
       cell.appendChild(image);
+      cell.appendChild(order);
       cell.appendChild(actions);
       thumbs.appendChild(cell);
     });
