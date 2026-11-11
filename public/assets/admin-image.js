@@ -1,18 +1,19 @@
 /* Third Wave Solutions — listing images for the owner dashboard.
  *
- * Two jobs:
+ * What this does:
  *
  * 1. The "Image path" box on admin.html is written straight into
  *    data/listings.json and rendered as <img src>, so a typo publishes a broken
  *    picture. The picker below previews the path and lists the photos that ship
  *    in assets/img.
  *
- * 2. Photos a seller attaches to the sell form are stored by FormSubmit and
- *    offered as signed links (they expire), so they never reach the repository
- *    on their own — which is why a listing could only ever show a stock picture.
- *    "Upload the seller's photo" resizes the downloaded photo in the browser,
- *    commits it to assets/img with the same GitHub token the dashboard uses,
- *    and fills the image path in for you.
+ * 2. Sellers send photos through the sell form, where FormSubmit stores them as
+ *    signed links that expire — they never reach the repository on their own.
+ *    "Upload the seller's photo" takes the downloaded cover photo, and "More
+ *    photos" takes the rest of the set; both are resized in the browser and
+ *    committed to assets/img with the same GitHub token the dashboard uses.
+ *    The cover fills the image path, the rest are collected in `photos`, which
+ *    admin.js copies into the listing and listings.js shows as a gallery.
  */
 (function () {
   "use strict";
@@ -164,48 +165,7 @@
     });
   }
 
-  /* ---------------- the seller's own photo ---------------- */
-
-  var upload = document.createElement("div");
-  upload.className = "img-upload";
-  upload.style.display = "grid";
-  upload.style.gap = ".4rem";
-  upload.style.marginTop = ".55rem";
-  upload.style.paddingTop = ".55rem";
-  upload.style.borderTop = "1px dashed var(--line)";
-
-  var fileInput = document.createElement("input");
-  fileInput.type = "file";
-  fileInput.id = "f-image-file";
-  fileInput.accept = "image/jpeg,image/png,image/webp,image/*";
-  fileInput.setAttribute("aria-label", "Seller photo to upload to the site");
-
-  var saveButton = document.createElement("button");
-  saveButton.type = "button";
-  saveButton.className = "btn btn--primary btn--sm";
-  saveButton.textContent = "Save photo to site images";
-  saveButton.disabled = true;
-
-  var uploadState = document.createElement("p");
-  uploadState.className = "img-picker-state";
-
-  var HINT =
-    "Upload the seller's own photo (download it from the FormSubmit dashboard — those links expire). " +
-    "It is resized to " + MAX_SIDE + " px and committed to assets/img as listing-<slug>.jpg.";
-
-  function uploadSay(text, kind) {
-    uploadState.className = "img-picker-state" + (kind ? " is-" + kind : "");
-    uploadState.textContent = text;
-  }
-
-  uploadSay(HINT);
-  upload.appendChild(fileInput);
-  upload.appendChild(saveButton);
-  upload.appendChild(uploadState);
-  side.appendChild(upload);
-
-  var pending = null;
-  var pendingUrl = "";
+  /* ---------------- shared helpers ---------------- */
 
   function readToken() {
     return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY) || "";
@@ -346,6 +306,49 @@
     return error.message || "The photo could not be saved to GitHub.";
   }
 
+  /* ---------------- the cover photo ---------------- */
+
+  var upload = document.createElement("div");
+  upload.className = "img-upload";
+  upload.style.display = "grid";
+  upload.style.gap = ".4rem";
+  upload.style.marginTop = ".55rem";
+  upload.style.paddingTop = ".55rem";
+  upload.style.borderTop = "1px dashed var(--line)";
+
+  var fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.id = "f-image-file";
+  fileInput.accept = "image/jpeg,image/png,image/webp,image/*";
+  fileInput.setAttribute("aria-label", "Seller photo to upload to the site");
+
+  var saveButton = document.createElement("button");
+  saveButton.type = "button";
+  saveButton.className = "btn btn--primary btn--sm";
+  saveButton.textContent = "Save photo to site images";
+  saveButton.disabled = true;
+
+  var uploadState = document.createElement("p");
+  uploadState.className = "img-picker-state";
+
+  var HINT =
+    "Cover photo — upload the seller's own picture (download it from the FormSubmit dashboard; those links expire). " +
+    "It is resized to " + MAX_SIDE + " px and committed to assets/img as listing-<slug>.jpg.";
+
+  function uploadSay(text, kind) {
+    uploadState.className = "img-picker-state" + (kind ? " is-" + kind : "");
+    uploadState.textContent = text;
+  }
+
+  uploadSay(HINT);
+  upload.appendChild(fileInput);
+  upload.appendChild(saveButton);
+  upload.appendChild(uploadState);
+  side.appendChild(upload);
+
+  var pending = null;
+  var pendingUrl = "";
+
   fileInput.addEventListener("change", function () {
     var file = fileInput.files && fileInput.files[0];
     pending = null;
@@ -437,5 +440,186 @@
       });
   });
 
+  /* ---------------- the gallery photos ---------------- */
+
+  // Read by admin.js when it builds the listing object.
+  var photos = [];
+  window.twsPhotos = photos;
+
+  var galleryBox = document.createElement("div");
+  galleryBox.className = "img-upload";
+  galleryBox.style.display = "grid";
+  galleryBox.style.gap = ".4rem";
+  galleryBox.style.marginTop = ".55rem";
+  galleryBox.style.paddingTop = ".55rem";
+  galleryBox.style.borderTop = "1px dashed var(--line)";
+
+  var galleryTitle = document.createElement("p");
+  galleryTitle.className = "img-picker-state";
+  galleryTitle.style.fontWeight = "600";
+  galleryTitle.style.color = "var(--ink)";
+  galleryTitle.textContent = "More photos — shown as a gallery under the main picture";
+
+  var galleryInput = document.createElement("input");
+  galleryInput.type = "file";
+  galleryInput.id = "f-image-gallery";
+  galleryInput.accept = "image/jpeg,image/png,image/webp,image/*";
+  galleryInput.multiple = true;
+  galleryInput.setAttribute("aria-label", "Extra seller photos for the listing gallery");
+
+  var thumbs = document.createElement("div");
+  thumbs.style.display = "grid";
+  thumbs.style.gridTemplateColumns = "repeat(auto-fill, minmax(96px, 1fr))";
+  thumbs.style.gap = ".5rem";
+
+  var galleryState = document.createElement("p");
+  galleryState.className = "img-picker-state";
+
+  var GALLERY_HINT =
+    "Optional. Each photo is resized to " + MAX_SIDE + " px and committed as listing-<slug>-g1.jpg, -g2.jpg… " +
+    "Use “Cover” to move one up to the main picture.";
+
+  function gallerySay(text, kind) {
+    galleryState.className = "img-picker-state" + (kind ? " is-" + kind : "");
+    galleryState.textContent = text;
+  }
+
+  gallerySay(GALLERY_HINT);
+  galleryBox.appendChild(galleryTitle);
+  galleryBox.appendChild(galleryInput);
+  galleryBox.appendChild(thumbs);
+  galleryBox.appendChild(galleryState);
+  side.appendChild(galleryBox);
+
+  function smallButton(label, variant) {
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn " + variant + " btn--sm";
+    button.textContent = label;
+    button.style.fontSize = ".68rem";
+    button.style.padding = ".15rem .35rem";
+    return button;
+  }
+
+  function makeCover(index) {
+    var chosen = photos[index];
+    if (!chosen) return;
+    var previous = currentPath();
+    photos.splice(index, 1);
+    // The old main picture joins the gallery, so nothing is lost in the swap.
+    if (previous && previous.indexOf("assets/img/") === 0) photos.unshift(previous);
+    input.value = chosen;
+    renderThumbs();
+    gallerySay("Cover is now " + chosen + (previous ? " — the previous main picture moved into the gallery." : "."), "good");
+  }
+
+  function renderThumbs() {
+    thumbs.innerHTML = "";
+    photos.forEach(function (path, index) {
+      var cell = document.createElement("div");
+      cell.style.border = "1px solid var(--line)";
+      cell.style.borderRadius = "6px";
+      cell.style.overflow = "hidden";
+      cell.style.background = "#fff";
+
+      var image = document.createElement("img");
+      image.src = path;
+      image.alt = "Gallery photo " + (index + 1);
+      image.style.width = "100%";
+      image.style.height = "68px";
+      image.style.objectFit = "cover";
+      image.style.display = "block";
+
+      var actions = document.createElement("div");
+      actions.style.display = "flex";
+      actions.style.gap = "2px";
+      actions.style.padding = "2px";
+      actions.style.background = "#f4f6f8";
+
+      var cover = smallButton("Cover", "btn--ghost");
+      cover.addEventListener("click", function () {
+        makeCover(index);
+      });
+
+      var remove = smallButton("Remove", "btn--danger");
+      remove.addEventListener("click", function () {
+        photos.splice(index, 1);
+        renderThumbs();
+        gallerySay("Removed from the listing. The file stays in the repository if you want it back.", "good");
+      });
+
+      actions.appendChild(cover);
+      actions.appendChild(remove);
+      cell.appendChild(image);
+      cell.appendChild(actions);
+      thumbs.appendChild(cell);
+    });
+  }
+
+  // admin.js calls this when it loads a listing (or starts a new one).
+  window.twsSetPhotos = function (list) {
+    photos.length = 0;
+    (Array.isArray(list) ? list : []).forEach(function (path) {
+      if (path) photos.push(String(path));
+    });
+    renderThumbs();
+  };
+
+  galleryInput.addEventListener("change", function () {
+    var files = Array.prototype.slice.call(galleryInput.files || []);
+    galleryInput.value = "";
+    if (!files.length) return;
+
+    var slug = slugForFile();
+    if (!slug) {
+      gallerySay("Type the public title first — photos are saved under the listing's name.", "bad");
+      return;
+    }
+    var token = readToken();
+    if (!token) {
+      gallerySay(
+        "Sign in with your GitHub token first (see \"Sign in to publish listings\") — saving photos writes to the repository.",
+        "bad"
+      );
+      return;
+    }
+
+    var total = files.length;
+    var saved = 0;
+    gallerySay("Saving 0 of " + total + "…");
+
+    files
+      .reduce(function (chain, file) {
+        return chain.then(function () {
+          if (!/^image\//i.test(file.type)) {
+            throw new Error(file.name + " is not a photo the browser can open.");
+          }
+          return shrink(file).then(function (result) {
+            var fileName = "listing-" + slug + "-g" + (photos.length + 1) + ".jpg";
+            return toBase64(result.blob)
+              .then(function (base64) {
+                return commitImage("public/assets/img/" + fileName, base64, token);
+              })
+              .then(function () {
+                photos.push("assets/img/" + fileName);
+                saved += 1;
+                renderThumbs();
+                gallerySay("Saved " + saved + " of " + total + "…");
+              });
+          });
+        });
+      }, Promise.resolve())
+      .then(function () {
+        gallerySay(
+          "Saved " + total + " gallery photo(s). They publish with the listing, in this order.",
+          "good"
+        );
+      })
+      .catch(function (error) {
+        gallerySay(describeUploadError(error), "bad");
+      });
+  });
+
+  renderThumbs();
   render();
 })();
