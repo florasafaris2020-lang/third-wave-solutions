@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-11-11",
+  "updated": "2026-11-08",
   "notice": "Sample profiles are illustrative and are not offers for sale. Live listings are added from admin.html only after Third Wave Solutions has reviewed and approved the seller's submission.",
   "listings": [
     {
@@ -152,30 +152,6 @@
         "liabilities": "Sample data"
       },
       "published": "2026-11-01"
-    },
-    {
-      "slug": "gallery-test",
-      "title": "Gallery Test",
-      "category": "Retail & wholesale",
-      "location": "Nairobi",
-      "ask": "KES 1M",
-      "summary": "Temporary listing used to check the gallery lightbox. Removed straight after the test.",
-      "image": "assets/img/cafe.jpg",
-      "photos": [
-        "assets/img/salon.jpg",
-        "assets/img/retail.jpg",
-        "assets/img/cafe.jpg"
-      ],
-      "status": "published",
-      "badge": "Approved listing",
-      "type": "live",
-      "checks": {
-        "cashflow": "Verified",
-        "kra": "Compliant",
-        "licences": "Current",
-        "liabilities": "None"
-      },
-      "published": "2026-11-11"
     }
   ]
 }
