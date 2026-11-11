@@ -129,6 +129,33 @@
         "liabilities": "Sample data"
       },
       "published": "2026-11-01"
+    },
+    {
+      "slug": "another-hardware",
+      "title": "Another hardware",
+      "category": "Hardware & building supplies",
+      "location": "Ruaka",
+      "ask": "Under KES 1M",
+      "revenue": "250000",
+      "cashflow": "34000",
+      "staff": "2",
+      "lease": "2",
+      "extra": null,
+      "summary": "Hardware sales in ruaka",
+      "image": "assets/img/office.jpg",
+      "photos": [],
+      "badge": "Approved listing",
+      "type": "live",
+      "page": "",
+      "status": "published",
+      "checks": {
+        "cashflow": "Verified",
+        "kra": "Compliant",
+        "licences": "Current",
+        "liabilities": "None"
+      },
+      "published": "2026-11-11",
+      "privateNotes": "Seller: Kamau · Phone: 0733861663 · Email: sleek12@gmail.com · Reason for sale: retiring · KRA: PIN active, returns not up to date · Licence status: — · Liabilities: —"
     }
   ]
 }
