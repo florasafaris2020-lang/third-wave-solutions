@@ -507,6 +507,8 @@
     $("f-extra").value = listing.extra && listing.extra.label ? listing.extra.label + ": " + (listing.extra.value || "") : "";
     $("f-summary").value = listing.summary || "";
     $("f-image").value = listing.image || "";
+    // The gallery photos are managed by admin-image.js; hand it this listing's list.
+    if (window.twsSetPhotos) window.twsSetPhotos(listing.photos || []);
     $("f-badge").value = listing.badge || "Approved listing";
     $("f-notes").value = listing.privateNotes || "";
 
@@ -543,6 +545,8 @@
       extra: extra,
       summary: $("f-summary").value.trim(),
       image: $("f-image").value.trim() || "assets/img/office.jpg",
+      // Extra photos for the gallery; the cover stays in `image`.
+      photos: (window.twsPhotos || []).slice(),
       badge: $("f-badge").value,
       type: editing.type || "live",
       page: editing.page || "",
